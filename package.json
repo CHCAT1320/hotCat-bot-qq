@@ -1,0 +1,22 @@
+{
+  "name": "hotcat-bot-qq",
+  "version": "0.0.1",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "CHCAT1320",
+  "license": "MIT",
+  "description": "",
+  "dependencies": {
+    "@napi-rs/canvas": "^1.0.0",
+    "node-napcat-ts": "^0.4.21",
+    "node-schedule": "^2.1.1"
+  },
+  "devDependencies": {
+    "@types/node-schedule": "^2.1.8",
+    "dependency-cruiser": "^17.4.3",
+    "madge": "^8.0.0"
+  }
+}

@@ -1,0 +1,10 @@
+node_modules/
+dynamics/
+pockAudio/
+old.js
+bun.lock
+package-lock.json
+*.json
+!package.json
+!tsconfig.json
+pnpm-lock.yaml
