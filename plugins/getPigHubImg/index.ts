@@ -2,7 +2,7 @@ import { Structs } from 'node-napcat-ts'
 import { bot } from '../../index.ts'
 
 async function randomPig() {
-    const res = await fetch('https://pighub.top/api/all-images')
+    const res = await fetch('https://pighub.top/api/images?sort=1')
     const data = await res.json()
     // console.log(data)
     const randomRes = data.images[Math.floor(Math.random() * data.images.length)]
