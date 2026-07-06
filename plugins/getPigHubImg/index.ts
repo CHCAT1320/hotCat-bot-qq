@@ -113,9 +113,10 @@ export async function getPigHubImg(ctx: any) {
                 Structs.text(`查看人数：${randomRes.view_count}\n`),
                 Structs.text(`下载次数：${randomRes.download_count}\n`),
                 Structs.text(`猪猪ID：${randomRes.id}\n`),
-                Structs.text(`上传时间：${new Date(randomRes.mtime * 1000).toLocaleString()}\n`),
+                Structs.text(`上传时间：${new Date(randomRes.mtime).toLocaleString()}\n`),
                 Structs.text(`文件名称：${randomRes.filename}\n`),
-                Structs.image('https://pighub.top/images/' + randomRes.image_url)
+                Structs.text(`由 pighub.top 提供\n`),
+                Structs.image('https://pighub.top/' + randomRes.image_url)
             ]
         })
     } catch (error) {
