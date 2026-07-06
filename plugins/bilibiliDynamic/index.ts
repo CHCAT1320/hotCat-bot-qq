@@ -19,7 +19,8 @@ export async function scheduleSendDynamic() {
             try {
                 dataUrl = await getNewDynamics(up)
             } catch (err) {
-                console.error(`获取 UP ${up} 动态异常:`, err.message)
+                let error = err as Error
+                console.error(`获取 UP ${up} 动态异常:`, error.message)
                 dataUrl = 1
             }
             
@@ -53,7 +54,8 @@ export async function scheduleSendDynamic() {
                 })
                 console.log(`UP ${up} 动态已发送到群 ${group.group_id}`)
             } catch (err) {
-                console.error(`向群 ${group.group_id} 发送消息失败:`, err.message)
+                let error = err as Error
+                console.error(`向群 ${group.group_id} 发送消息失败:`, error.message)
             }
         }
     }
