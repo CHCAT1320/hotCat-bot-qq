@@ -115,9 +115,7 @@ export async function getPigHubImg(ctx: any) {
                 Structs.text(`猪猪ID：${randomRes.id}\n`),
                 Structs.text(`上传时间：${new Date(randomRes.mtime * 1000).toLocaleString()}\n`),
                 Structs.text(`文件名称：${randomRes.filename}\n`),
-                Structs.text(`duration：${randomRes.duration}\n`),
-                Structs.text(`图片类型：${randomRes.image_type}\n`),
-                Structs.image('https://pighub.top/images/' + randomRes.thumbnail)
+                Structs.image('https://pighub.top/images/' + randomRes.image_url)
             ]
         })
     } catch (error) {
