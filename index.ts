@@ -11,6 +11,7 @@ import { meme2img } from './plugins/meme2img/index.ts'
 import { scheduleSendDynamic } from './plugins/bilibiliDynamic/index.ts'
 import { addJiting, deleteJiting, addJitingAlias, deleteJitingAlias, updateJitingMembers, lookUpJiting, lookUpOneJiting, jitingRank, getGroupShopInfo, getAllShops, scheduleDailyReset } from './plugins/jiting/index.ts'
 import { sendHelp } from './plugins/help/index.ts'
+import { handleWeather } from './plugins/weather/index.ts'
 
 class botClient {
     public api!: NCWebsocket
@@ -165,5 +166,6 @@ bot.onGroupMessageFns.push(jitingRank)
 bot.onGroupMessageFns.push(getGroupShopInfo)
 bot.onGroupMessageFns.push(getAllShops)
 bot.onGroupMessageFns.push(sendHelp)
+bot.onGroupMessageFns.push(handleWeather)
 
 scheduleDailyReset()

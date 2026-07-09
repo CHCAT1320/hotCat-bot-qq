@@ -93,6 +93,17 @@ const SECTIONS: Section[] = [
       { cmd: '每日零点机厅人数自动清零', desc: '' },
     ],
   },
+  {
+    title: '气象',
+    accent: '#38BDF8',
+    cmds: [
+      { cmd: '天气 雷达图', desc: '全国雷达拼图' },
+      { cmd: '天气 云图', desc: '卫星云图' },
+      { cmd: '天气 风场 / 风场图', desc: '风场流线图' },
+      { cmd: '天气 台风', desc: '台风路径图' },
+      { cmd: '天气 台风全览', desc: '台风全览图' },
+    ],
+  },
 ]
 
 const CARD_R = 14
