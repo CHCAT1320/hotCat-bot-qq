@@ -28,6 +28,7 @@ async function renderAndSend(
                 Structs.at(ctx.sender.user_id),
                 Structs.text(`\n${label}`),
                 Structs.image(toBase64Url(result.dataUrl)),
+                Structs.text('\n数据来源：中国天气网 weather.com.cn | 底图：高德地图 Amap'),
             ],
         })
     } catch (e: any) {
