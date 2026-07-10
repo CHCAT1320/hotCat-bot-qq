@@ -24,19 +24,20 @@ async function renderAndSend(
     renderFn: () => Promise<RenderResult>,
     label: string,
     fallbackMsg: string,
+    showCredit = true,
 ) {
     try {
         const result = await renderFn()
-        await bot.api.send_group_msg({
-            group_id: ctx.group_id,
-            message: [
-                Structs.reply(ctx.message_id),
-                Structs.at(ctx.sender.user_id),
-                Structs.text(`\n${label}`),
-                Structs.image(toBase64Url(result.dataUrl)),
-                Structs.text('\n数据来源：中国天气网 weather.com.cn\n底图：高德地图 Amap'),
-            ],
-        })
+        const msg: any[] = [
+            Structs.reply(ctx.message_id),
+            Structs.at(ctx.sender.user_id),
+            Structs.text(`\n${label}`),
+            Structs.image(toBase64Url(result.dataUrl)),
+        ]
+        if (showCredit) {
+            msg.push(Structs.text('\n数据来源：中国天气网 weather.com.cn\n底图：高德地图 Amap'))
+        }
+        await bot.api.send_group_msg({ group_id: ctx.group_id, message: msg })
     } catch (e: any) {
         await bot.api.send_group_msg({
             group_id: ctx.group_id,
@@ -175,6 +176,7 @@ export async function handleWeather(ctx: any) {
             () => renderWeatherDashboard(cityCode),
             `${cities[0].ref.split('~')[2] || cityName} 天气`,
             '天气获取失败',
+            false,
         )
     } catch (e: any) {
         await sendText(ctx, `天气查询失败：${e.message || '未知错误'}`)
