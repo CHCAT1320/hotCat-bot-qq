@@ -1,9 +1,6 @@
 import { Structs } from 'node-napcat-ts'
 import { bot } from '../../index.ts'
 import { createCanvas, GlobalFonts } from '@napi-rs/canvas'
-import { writeFileSync, unlinkSync } from 'fs'
-import { join } from 'path'
-import { tmpdir } from 'os'
 
 GlobalFonts.registerFromPath('C:\\Windows\\Fonts\\msyh.ttc', 'Microsoft YaHei')
 
@@ -93,15 +90,18 @@ const SECTIONS: Section[] = [
       { cmd: '每日零点机厅人数自动清零', desc: '' },
     ],
   },
-  {
+{
     title: '气象',
     accent: '#38BDF8',
     cmds: [
-      { cmd: '天气 雷达图', desc: '全国雷达拼图' },
+      { cmd: '天气 / 天气 雷达 / 雷达图', desc: '全国雷达拼图（默认）' },
       { cmd: '天气 云图', desc: '卫星云图' },
-      { cmd: '天气 风场 / 风场图', desc: '风场流线图' },
+      { cmd: '天气 风场 / 风场图', desc: '全国风场流线图' },
+      { cmd: '天气 全球风场 / 全球风场图', desc: '全球风场流线图' },
       { cmd: '天气 台风', desc: '台风路径图' },
       { cmd: '天气 台风全览', desc: '台风全览图' },
+      { cmd: '天气 台风列表', desc: '查看活跃台风列表' },
+      { cmd: '天气 台风 <编号>', desc: '台风详情（如 天气 台风2609）' },
     ],
   },
 ]
@@ -237,19 +237,12 @@ export async function sendHelp(ctx: any): Promise<void> {
   c.fillText('hotCat-bot-qq  ·  by CHCAT1320', W / 2, H - 16)
 
   const pngBuffer = canvas.encodeSync('png')
-  const tmpPath = join(tmpdir(), `hotcat_help_${Date.now()}.png`)
-  writeFileSync(tmpPath, pngBuffer)
+    const dataUrl = 'base64://' + pngBuffer.toString('base64')
 
-  try {
     await bot.api.send_group_msg({
-      group_id: ctx.group_id,
-      message: [
-        Structs.image('file:///' + tmpPath.replace(/\\/g, '/')),
-      ]
+        group_id: ctx.group_id,
+        message: [
+            Structs.image(dataUrl),
+        ],
     })
-  } finally {
-    setTimeout(() => {
-      try { unlinkSync(tmpPath) } catch {}
-    }, 5000)
-  }
 }
