@@ -94,6 +94,7 @@ const SECTIONS: Section[] = [
     title: '气象',
     accent: '#38BDF8',
     cmds: [
+      { cmd: '天气 <城市名>', desc: '城市天气（如 天气 北京）' },
       { cmd: '天气 / 天气 雷达 / 雷达图', desc: '全国雷达拼图（默认）' },
       { cmd: '天气 云图', desc: '卫星云图' },
       { cmd: '天气 风场 / 风场图', desc: '全国风场流线图' },

@@ -13,7 +13,7 @@
     "@napi-rs/canvas": "^1.0.0",
     "node-napcat-ts": "^0.4.21",
     "node-schedule": "^2.1.1",
-    "weather-com-cn-api": "git+ssh://git@github.com/CHCAT1320/weather-com-cn-api.git"
+    "weather-com-cn-api": "^1.0.1"
   },
   "devDependencies": {
     "@types/node-schedule": "^2.1.8",

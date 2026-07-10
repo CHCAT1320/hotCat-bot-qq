@@ -7,9 +7,11 @@ import {
     renderGlobalWind,
     renderChinaTyphoon,
     renderTyphoonOverview,
+    renderWeatherDashboard,
     getTyphoonList,
     getTyphoonNew,
     extractTrack,
+    searchCity,
 } from 'weather-com-cn-api'
 import type { RenderResult } from 'weather-com-cn-api'
 
@@ -156,5 +158,25 @@ export async function handleWeather(ctx: any) {
     if (sub === '台风全览') {
         await renderAndSend(ctx, renderTyphoonOverview, '台风全览图', '台风全览图获取失败（当前可能没有活跃台风）')
         return
+    }
+
+    let cityName = sub
+    if (!cityName) return
+
+    try {
+        const cities = await searchCity(cityName)
+        if (cities.length === 0) {
+            await sendText(ctx, `未找到城市"${cityName}"`)
+            return
+        }
+        const cityCode = cities[0].ref.split('~')[0]
+        await renderAndSend(
+            ctx,
+            () => renderWeatherDashboard(cityCode),
+            `${cities[0].ref.split('~')[2] || cityName} 天气`,
+            '天气获取失败',
+        )
+    } catch (e: any) {
+        await sendText(ctx, `天气查询失败：${e.message || '未知错误'}`)
     }
 }
