@@ -33,9 +33,10 @@ async function renderAndSend(
             Structs.at(ctx.sender.user_id),
             Structs.text(`\n${label}`),
             Structs.image(toBase64Url(result.dataUrl)),
+            Structs.text('\n数据来源：中国天气网 weather.com.cn'),
         ]
         if (showCredit) {
-            msg.push(Structs.text('\n数据来源：中国天气网 weather.com.cn\n底图：高德地图 Amap'))
+            msg.push(Structs.text('\n底图：高德地图 Amap'))
         }
         await bot.api.send_group_msg({ group_id: ctx.group_id, message: msg })
     } catch (e: any) {
