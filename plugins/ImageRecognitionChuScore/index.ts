@@ -1,7 +1,7 @@
 import { YoloDetectionInference } from "ppu-yolo-onnx-inference";
 import { readFileSync } from "fs";
 import { Structs } from 'node-napcat-ts'
-// import { bot } from '../../index.ts'
+import { bot } from '../../index.ts'
 import axios from 'axios';
 
 let detector: YoloDetectionInference | null = null;
@@ -71,7 +71,7 @@ async function applyExifRotation(ab: ArrayBuffer): Promise<ArrayBuffer> {
     const bytes = new Uint8Array(ab);
     const orientation = readExifOrientation(bytes);
     if (orientation === 1) return ab;
-    const { createCanvas, loadImage, Image } = await import('canvas');
+    const { createCanvas, loadImage } = await import('@napi-rs/canvas');
     const img = await loadImage(Buffer.from(ab));
     const swap = orientation >= 5 && orientation <= 8;
     const canvas = createCanvas(swap ? img.height : img.width, swap ? img.width : img.height);
