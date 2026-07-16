@@ -11,8 +11,12 @@
   "description": "",
   "dependencies": {
     "@napi-rs/canvas": "^1.0.0",
+    "@types/node": "^26.1.1",
+    "axios": "^1.18.1",
     "node-napcat-ts": "^0.4.21",
     "node-schedule": "^2.1.1",
+    "onnxruntime-node": "^1.27.0",
+    "ppu-yolo-onnx-inference": "^2.0.0",
     "weather-com-cn-api": "^1.0.1"
   },
   "devDependencies": {
