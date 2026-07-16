@@ -1,8 +1,12 @@
 import { YoloDetectionInference } from "ppu-yolo-onnx-inference";
-import { readFileSync } from "fs";
+import { readFileSync, writeFileSync, mkdirSync } from "fs";
 import { Structs } from 'node-napcat-ts'
-import { bot } from '../../index.ts'
+// import { bot } from '../../index.ts'
 import axios from 'axios';
+import { createCanvas, loadImage } from '@napi-rs/canvas';
+
+const DEBUG_DIR = "plugins/ImageRecognitionChuScore/out";
+mkdirSync(DEBUG_DIR, { recursive: true });
 
 let detector: YoloDetectionInference | null = null;
 
@@ -16,6 +20,7 @@ async function getDetector(): Promise<YoloDetectionInference> {
                 classNames: classNames,
             },
             thresholds: { confidence: 0.5 },
+            debug: { debug: true, debugFolder: DEBUG_DIR },
         });
         await detector.init();
     }
@@ -25,12 +30,10 @@ async function getDetector(): Promise<YoloDetectionInference> {
 async function downloadImage(url: string): Promise<ArrayBuffer> {
     const response = await axios.get(url, { responseType: 'arraybuffer' });
     const buf = response.data as ArrayBuffer | Buffer;
-    const ab = buf instanceof ArrayBuffer ? buf : (() => {
-        const out = new ArrayBuffer(buf.byteLength);
-        new Uint8Array(out).set(buf);
-        return out;
-    })();
-    return applyExifRotation(ab);
+    if (buf instanceof ArrayBuffer) return buf;
+    const ab = new ArrayBuffer(buf.byteLength);
+    new Uint8Array(ab).set(buf);
+    return ab;
 }
 
 function readExifOrientation(bytes: Uint8Array): number {
@@ -123,13 +126,57 @@ export async function imageRecognitionChuScore(ctx: any) {
 }
 
 export async function _debugTestLocal() {
-    const path = "plugins/ImageRecognitionChuScore/test2.png";
+    const path = "plugins/ImageRecognitionChuScore/test3.jpg";
     const raw = readFileSync(path).buffer;
-    const ab = await applyExifRotation(raw);
+    const ab = await safeApplyExifRotation(raw);
+    const stamp = Date.now();
+    writeFileSync(`${DEBUG_DIR}/${stamp}_input.png`, Buffer.from(ab));
     const detector = await getDetector();
     const detections = await detector.detect(ab);
     console.log(`[local test] ${path} -> ${detections.length} detections`);
     console.log(detections);
+    await drawBoxesOnOriginal(ab, detections, `${stamp}_annotated.png`);
     return detections;
+}
+
+async function drawBoxesOnOriginal(
+    ab: ArrayBuffer,
+    detections: { box: { x: number; y: number; width: number; height: number }; className: string; confidence: number }[],
+    filename: string,
+) {
+    const img = await loadImage(Buffer.from(ab));
+    const canvas = createCanvas(img.width, img.height);
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img as unknown as CanvasImageSource, 0, 0);
+    ctx.lineWidth = Math.max(2, Math.round(Math.min(img.width, img.height) / 400));
+    ctx.font = `${Math.max(14, Math.round(Math.min(img.width, img.height) / 30))}px sans-serif`;
+    for (const d of detections) {
+        const w = img.width / 640;
+        const h = img.height / 640;
+        const x = d.box.x * w;
+        const y = d.box.y * h;
+        const bw = d.box.width * w;
+        const bh = d.box.height * h;
+        ctx.strokeStyle = '#00ff00';
+        ctx.strokeRect(x, y, bw, bh);
+        const label = `${d.className} ${(d.confidence * 100).toFixed(1)}%`;
+        const tw = ctx.measureText(label).width;
+        const th = Math.max(14, Math.round(Math.min(img.width, img.height) / 30));
+        ctx.fillStyle = '#00ff00';
+        ctx.fillRect(x, Math.max(0, y - th), tw + 8, th);
+        ctx.fillStyle = '#000';
+        ctx.fillText(label, x + 4, Math.max(th - 2, y - 2));
+    }
+    writeFileSync(`${DEBUG_DIR}/${filename}`, canvas.toBuffer('image/png'));
+    console.log(`[debug] annotated image saved: ${DEBUG_DIR}/${filename}`);
+}
+
+async function safeApplyExifRotation(ab: ArrayBuffer): Promise<ArrayBuffer> {
+    try {
+        return await applyExifRotation(ab);
+    } catch (e) {
+        console.warn('[exif] rotation failed, using original:', (e as Error).message);
+        return ab;
+    }
 }
 _debugTestLocal();
