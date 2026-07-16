@@ -4,7 +4,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall": "node --experimental-strip-types scripts/patch-ppu-yolo.mjs || bun scripts/patch-ppu-yolo.mjs || echo 'skip patch: no node/bun'"
   },
   "author": "CHCAT1320",
   "license": "MIT",
@@ -22,6 +23,7 @@
   "devDependencies": {
     "@types/node-schedule": "^2.1.8",
     "dependency-cruiser": "^17.4.3",
-    "madge": "^8.0.0"
+    "madge": "^8.0.0",
+    "patch-package": "^8.0.1"
   }
 }
