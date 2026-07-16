@@ -46,7 +46,7 @@ export async function imageRecognitionChuScore(ctx: any) {
                         group_id: ctx.group_id,
                         message: [
                             Structs.at(ctx.sender.user_id),
-                            Structs.text("大神啊！"),
+                            Structs.text(" 大神啊！"),
                         ]
                     });
                 }
