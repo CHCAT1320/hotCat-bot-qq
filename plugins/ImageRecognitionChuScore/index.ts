@@ -10,6 +10,7 @@ const CLASS_NAMES = ["chuScore"];
 const CONFIDENCE_THRESHOLD = 0.5;
 const IOU_THRESHOLD = 0.5;
 const DEBUG_DIR = "plugins/ImageRecognitionChuScore/out";
+const SEND_ANNOTATED_IMAGE = true;
 mkdirSync(DEBUG_DIR, { recursive: true });
 
 let session: InferenceSession | null = null;
@@ -39,10 +40,12 @@ async function downloadImage(url: string): Promise<ArrayBuffer> {
     return ab;
 }
 
-async function isChuScoreImage(imageBuffer: ArrayBuffer): Promise<boolean> {
+async function isChuScoreImage(imageBuffer: ArrayBuffer): Promise<Detection[] | null> {
     const detections = await detect(imageBuffer);
     console.log(detections);
-    return detections.length > 0 && detections[0].className === "chuScore" && detections[0].confidence > CONFIDENCE_THRESHOLD && detections[0].confidence <= 1.0;
+    if (detections.length === 0 || detections[0].className !== "chuScore") return null;
+    if (detections[0].confidence <= CONFIDENCE_THRESHOLD || detections[0].confidence > 1.0) return null;
+    return detections;
 }
 
 export async function imageRecognitionChuScore(ctx: any) {
@@ -51,14 +54,19 @@ export async function imageRecognitionChuScore(ctx: any) {
             const imageUrl = msg.data.url;
             try {
                 const imgBuffer = await downloadImage(imageUrl);
-                const result = await isChuScoreImage(imgBuffer);
-                if (result) {
+                const detections = await isChuScoreImage(imgBuffer);
+                if (detections) {
+                    const message: any[] = [
+                        Structs.at(ctx.sender.user_id),
+                        Structs.text(" 大神啊！"),
+                    ];
+                    if (SEND_ANNOTATED_IMAGE) {
+                        const annotatedBuf = await renderAnnotated(imgBuffer, detections);
+                        message.push(Structs.image(annotatedBuf, "chuScore 识别结果"));
+                    }
                     bot.api.send_group_msg({
                         group_id: ctx.group_id,
-                        message: [
-                            Structs.at(ctx.sender.user_id),
-                            Structs.text(" 大神啊！"),
-                        ]
+                        message,
                     });
                 }
             } catch (error) {
@@ -66,6 +74,27 @@ export async function imageRecognitionChuScore(ctx: any) {
             }
         }
     }
+}
+
+async function renderAnnotated(ab: ArrayBuffer, detections: Detection[]): Promise<Buffer> {
+    const img = await loadImage(Buffer.from(ab));
+    const canvas = createCanvas(img.width, img.height);
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img as unknown as CanvasImageSource, 0, 0);
+    ctx.lineWidth = Math.max(2, Math.round(Math.min(img.width, img.height) / 400));
+    ctx.font = `${Math.max(14, Math.round(Math.min(img.width, img.height) / 30))}px sans-serif`;
+    for (const d of detections) {
+        ctx.strokeStyle = '#00ff00';
+        ctx.strokeRect(d.box.x, d.box.y, d.box.width, d.box.height);
+        const label = `${d.className} ${(d.confidence * 100).toFixed(1)}%`;
+        const tw = ctx.measureText(label).width;
+        const th = Math.max(14, Math.round(Math.min(img.width, img.height) / 30));
+        ctx.fillStyle = '#00ff00';
+        ctx.fillRect(d.box.x, Math.max(0, d.box.y - th), tw + 8, th);
+        ctx.fillStyle = '#000';
+        ctx.fillText(label, d.box.x + 4, Math.max(th - 2, d.box.y - 2));
+    }
+    return canvas.toBuffer('image/png');
 }
 
 interface Detection {
