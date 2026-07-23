@@ -168,6 +168,6 @@ bot.onGroupMessageFns.push(getGroupShopInfo)
 bot.onGroupMessageFns.push(getAllShops)
 bot.onGroupMessageFns.push(sendHelp)
 bot.onGroupMessageFns.push(handleWeather)
-bot.onGroupMessageFns.push(imageRecognitionChuScore)
+// bot.onGroupMessageFns.push(imageRecognitionChuScore) 该功能效果不佳，弃用
 
 scheduleDailyReset()
