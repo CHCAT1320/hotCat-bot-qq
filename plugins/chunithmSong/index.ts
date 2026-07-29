@@ -1,5 +1,5 @@
 import { Structs } from 'node-napcat-ts'
-import { bot } from '../../index.ts'
+import { bot } from '../../indexOld.ts'
 
 const SONG_LIST_URL = 'https://maimai.lxns.net/api/v0/chunithm/song/list?notes=true'
 const ALIAS_LIST_URL = 'https://maimai.lxns.net/api/v0/chunithm/alias/list'

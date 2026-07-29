@@ -1,5 +1,5 @@
 import { Structs } from 'node-napcat-ts'
-import { bot } from '../../index.ts'
+import { bot } from '../../indexOld.ts'
 
 // 配置常量
 const CONFIG = {

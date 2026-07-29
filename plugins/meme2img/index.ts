@@ -1,5 +1,5 @@
 import { Structs } from 'node-napcat-ts'
-import { bot } from '../../index.ts'
+import { bot } from '../../indexOld.ts'
 
 export async function meme2img(ctx: any) {
     if (ctx.raw_message.startsWith('给我表情') === false && ctx.raw_message.endsWith('给我表情') === false) return

@@ -5,6 +5,9 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs",
     "postinstall": "node --experimental-strip-types scripts/patch-ppu-yolo.mjs || bun scripts/patch-ppu-yolo.mjs || echo 'skip patch: no node/bun'"
   },
   "author": "CHCAT1320",
@@ -12,9 +15,9 @@
   "description": "",
   "dependencies": {
     "@napi-rs/canvas": "^1.0.0",
-    "@types/node": "^26.1.1",
+    "@types/node": "^26.1.2",
     "axios": "^1.18.1",
-    "node-napcat-ts": "^0.4.21",
+    "node-napcat-ts": "^0.4.25",
     "node-schedule": "^2.1.1",
     "onnxruntime-node": "^1.27.0",
     "ppu-yolo-onnx-inference": "^2.0.0",
@@ -24,6 +27,7 @@
     "@types/node-schedule": "^2.1.8",
     "dependency-cruiser": "^17.4.3",
     "madge": "^8.0.0",
-    "patch-package": "^8.0.1"
+    "patch-package": "^8.0.1",
+    "vitepress": "^1.6.4"
   }
 }

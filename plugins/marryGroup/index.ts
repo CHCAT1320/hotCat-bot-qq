@@ -1,5 +1,5 @@
 import { Structs } from 'node-napcat-ts'
-import { bot } from '../../index.ts'
+import { bot } from '../../indexOld.ts'
 
 interface Marriage {
     userId: string

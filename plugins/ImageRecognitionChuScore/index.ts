@@ -1,7 +1,7 @@
 import { InferenceSession, Tensor } from 'onnxruntime-node';
 import { readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { Structs } from 'node-napcat-ts'
-import { bot } from '../../index.ts'
+import { bot } from '../../indexOld.ts'
 import axios from 'axios';
 import { createCanvas, loadImage } from '@napi-rs/canvas';
 

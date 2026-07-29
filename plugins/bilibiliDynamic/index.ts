@@ -1,6 +1,6 @@
 import { Structs } from 'node-napcat-ts'
 import { getNewDynamics } from 'bilibili-dynamic-get'
-import { bot } from '../../index.ts'
+import { bot } from '../../indexOld.ts'
 
 const UPS = [404145357, 1148546890, 401742377, 564698247, 414149787, 1644970825, 481648327, 1311127373, 406599529, 1259975175]
 const MAX_RETRIES = 15
