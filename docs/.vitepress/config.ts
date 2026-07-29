@@ -3,7 +3,7 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
     title: 'HotCat Bot',
     description: '基于 napcat 的 QQ 机器人框架',
-    base: process.env.NODE_ENV === 'production' ? '/hotCat-bot-qq/' : '/',
+    base: '/',
     themeConfig: {
         search: {
             provider: 'local',
