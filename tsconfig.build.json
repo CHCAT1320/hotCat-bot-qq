@@ -7,5 +7,5 @@
     "outDir": "dist",
     "rootDir": "."
   },
-  "include": ["index.ts", "message.ts", "botApi.ts", "botClient.ts", "botConsole.ts", "botEvent.ts", "botScheduler.ts"]
+  "include": ["index.ts", "message.ts", "botApi.ts", "botClient.ts", "botConsole.ts", "botEvent.ts", "botScheduler.ts", "botPlugin.ts", "plugin.ts"]
 }

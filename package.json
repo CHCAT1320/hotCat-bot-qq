@@ -1,6 +1,6 @@
 {
   "name": "hotcat-bot-qq",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "基于 node-napcat-ts 的 TypeScript QQ 机器人框架",
   "type": "module",
   "main": "dist/index.js",
@@ -29,10 +29,24 @@
     "./botEvent": {
       "types": "./dist/botEvent.d.ts",
       "default": "./dist/botEvent.js"
+    },
+    "./botScheduler": {
+      "types": "./dist/botScheduler.d.ts",
+      "default": "./dist/botScheduler.js"
+    },
+    "./botPlugin": {
+      "types": "./dist/botPlugin.d.ts",
+      "default": "./dist/botPlugin.js"
+    },
+    "./plugin": {
+      "types": "./dist/plugin.d.ts",
+      "default": "./dist/plugin.js"
     }
   },
   "files": [
     "dist",
+    "plugins/hotCatPlugin",
+    "scripts/postinstall.mjs",
     "LICENSE",
     "README.md",
     "logo.png"
@@ -40,6 +54,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall": "node scripts/postinstall.mjs || bun scripts/postinstall.mjs || echo skip",
     "prepublishOnly": "bun run build",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",

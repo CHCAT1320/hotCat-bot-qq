@@ -27,10 +27,9 @@ bun add hotcat-bot-qq
 创建一个入口文件 `bot.ts`：
 
 ```ts
-import { NCWebsocketOptions } from 'node-napcat-ts'
 import { BotClient, Message } from 'hotcat-bot-qq'
 
-const config: NCWebsocketOptions = {
+const bot = new BotClient({
     baseUrl: 'ws://localhost:8082/onebot/v11/ws/',
     accessToken: 'your-access-token',
     reconnection: {
@@ -38,9 +37,7 @@ const config: NCWebsocketOptions = {
         attempts: 10,
         delay: 5000,
     },
-}
-
-export const bot = new BotClient(config)
+})
 await bot.start()
 ```
 
@@ -58,6 +55,16 @@ bun bot.ts
 ```
 
 ## 基础用法
+
+- [监听群消息](#监听群消息)
+- [监听私聊消息](#监听私聊消息)
+- [发送消息](#发送消息)
+- [撤回消息](#撤回消息)
+- [禁言](#禁言)
+- [定时任务](#定时任务)
+- [处理加好友请求](#处理加好友请求)
+- [处理加群邀请](#处理加群邀请)
+- [常用模式](#常用模式)
 
 ### 监听群消息
 
@@ -238,3 +245,5 @@ bot.event.request.onFriend(async (bot, event) => {
 - 查看 [API 参考](/api/) 了解完整 API
 - 查看 [Message 消息段](/api/message) 了解所有消息类型
 - 查看 [BotEvent 事件](/api/bot-event) 了解所有事件监听
+- 查看 [BotScheduler 定时任务](/api/bot-scheduler) 了解 cron / 间隔 / 指定时间
+- 查看 [插件开发指南](/guide/plugin-dev) 开始写自己的插件

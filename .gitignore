@@ -16,8 +16,8 @@ napcat/
 dist/
 
 # 非框架文件
-plugins/
 scripts
+!scripts/postinstall.mjs
 indexOld.ts
 
 # vitepress

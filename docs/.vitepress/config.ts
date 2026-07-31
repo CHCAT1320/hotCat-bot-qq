@@ -55,6 +55,7 @@ export default defineConfig({
                         },
                         { text: 'BotEvent', link: '/api/bot-event' },
                         { text: 'BotScheduler', link: '/api/bot-scheduler' },
+                        { text: 'BotPluginSystem', link: '/api/bot-plugin' },
                     ],
                 },
                 {
@@ -66,6 +67,15 @@ export default defineConfig({
                 },
             ],
         },
+        '/guide/': [
+            {
+                text: '指南',
+                items: [
+                    { text: '快速开始', link: '/guide/getting-started' },
+                    { text: '插件开发', link: '/guide/plugin-dev' },
+                ],
+            },
+        ],
         socialLinks: [
             { icon: 'github', link: 'https://github.com/CHCAT1320/hotCat-bot-qq' },
         ],

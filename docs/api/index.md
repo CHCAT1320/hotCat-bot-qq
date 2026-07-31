@@ -8,6 +8,7 @@ HotCat Bot 所有公共 API 按类组织：
 | [BotApi](/api/bot-api) | `bot.api.xxx()` | 所有 napcat API 的统一封装 |
 | [BotEvent](/api/bot-event) | `bot.event.xxx()` | 事件监听，按类别分组 |
 | [BotScheduler](/api/bot-scheduler) | `bot.scheduler.xxx()` | 定时任务调度 |
+| [BotPluginSystem](/api/bot-plugin) | `bot.plugin.xxx()` | 插件注册、加载、热重载、目录监听 |
 | [Message](/api/message) | `Message.xxx()` | 消息段构建器 |
 
 ## 架构
@@ -22,6 +23,7 @@ BotClient
  │    ├── request: RequestEvent       (加好友/加群请求)
  │    └── notice: NoticeEvent         (通知事件)
  ├── scheduler: BotScheduler → bot.scheduler.cron(...)
+ ├── plugin: BotPluginSystem → bot.plugin.register(...)
  ├── nickname: string     (bot 昵称)
  └── id: number           (bot QQ 号)
 ```

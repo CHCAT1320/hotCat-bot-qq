@@ -1,9 +1,7 @@
-import { NCWebsocketOptions } from 'node-napcat-ts' // 导入必要的模块
-import { BotClient, Message } from './' // 导入botClient类
+import { BotClient } from './botClient'
+import { Message } from './message'
 
-
-
-const config: NCWebsocketOptions = {
+const config = {
     baseUrl: 'ws://localhost:8082/onebot/v11/ws/',
     accessToken: 'chcat13201145',
     reconnection: {
@@ -15,9 +13,6 @@ const config: NCWebsocketOptions = {
 
 export const bot = new BotClient(config);
 await bot.start();
-// const nickname = bot.nickname;
-// const id = bot.id;
-// console.log(`Bot started with nickname: ${nickname}, ID: ${id}`);
 
 bot.event.message.onGroupMessage(async (bot, event) => {
     if (event.group_id !== 912458345) return;

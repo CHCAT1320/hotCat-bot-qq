@@ -20,9 +20,9 @@ features:
   - icon: 🚀
     title: 类型安全
     details: 基于 TypeScript，完整的类型推导，封装 napcat 全部 API
-  - icon: 📦
-    title: 消息段构建
-    details: Message 类提供链式消息段构建，支持文本、图片、表情、文件等所有类型
+  - icon: 🧩
+    title: 插件系统
+    details: 继承 PluginBase 即可开发，支持热重载、目录监听，启动自动扫描加载
   - icon: 🔌
     title: 事件系统
     details: BotEvent 按类别分组暴露 message/messageSent/notice/request 事件监听

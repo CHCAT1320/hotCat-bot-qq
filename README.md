@@ -19,7 +19,8 @@ bun add hotcat-bot-qq
 ## 快速开始
 
 ```ts
-import { BotClient, Message } from 'hotcat-bot-qq'
+import { BotClient } from './botClient'
+import { Message } from './message'
 
 const bot = new BotClient({
     baseUrl: 'ws://localhost:8082/onebot/v11/ws/',
@@ -39,9 +40,9 @@ bot.event.message.onGroupMessage(async (bot, event) => {
 
 - **类型安全** — 完整的 TypeScript 类型推导，封装 napcat 全部 API
 - **消息段构建** — `Message` 类支持文本、图片、表情、文件等所有消息类型
-- **彩色日志** — 内置 `BotConsole` 控制台日志，自动解析 CQ 码
 - **事件系统** — `BotEvent` 按类别分组暴露 message/messageSent/request/notice 事件
-- **定时任务** — `BotScheduler` 支持 cron 表达式、固定间隔、指定时间，轻松实现早安晚安等定时功能
+- **定时任务** — `BotScheduler` 支持 cron 表达式、固定间隔、指定时间
+- **插件系统** — 继承 `PluginBase` 即可开发插件，支持热重载、目录监听自动加载，`scan` + `watch` 零配置接入
 
 ## 文档
 

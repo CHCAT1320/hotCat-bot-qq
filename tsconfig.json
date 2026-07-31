@@ -15,6 +15,12 @@
     "noEmit": true,
     "jsx": "preserve",
 
+    /* Path alias */
+    "paths": {
+      "hotcat-bot-qq": ["./index.ts"],
+      "hotcat-bot-qq/*": ["./*"]
+    },
+
     /* Linting */
     "strict": false,
     "noUnusedLocals": true,
