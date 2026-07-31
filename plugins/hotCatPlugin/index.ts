@@ -13,7 +13,6 @@ export class HotCatPlugin extends PluginBase {
     }
 
     private startTime = 0
-    private enabled = false
 
     static create(api: BotApi, bot: BotClient) {
         return new HotCatPlugin(api, bot)
@@ -21,16 +20,14 @@ export class HotCatPlugin extends PluginBase {
 
     async load() {
         this.startTime = Date.now()
-        this.enabled = true
-        this.bot.event.message.onGroupMessage(this.onGroupMsg)
+        this.api.napcat.on('message.group', this.onGroupMsg)
     }
 
     async unload() {
-        this.enabled = false
+        this.api.napcat.off('message.group', this.onGroupMsg)
     }
 
-    private onGroupMsg = async (_bot: BotClient, event: any) => {
-        if (!this.enabled) return
+    private onGroupMsg = async (event: any) => {
         const msg = event.raw_message.trim()
 
         if (msg === '#hotCat' || msg === '#hotcat') {

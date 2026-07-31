@@ -89,25 +89,21 @@ import { Message } from 'hotcat-bot-qq/message'
 
 > 项目通过 `tsconfig.json` 的 `paths` 将 `hotcat-bot-qq` 映射到本地根目录，开发时无需发布 npm 即可直接使用。
 
-## 卸载注意事项
+## 卸载清理
 
-napcat 暂不支持 `off()` 移除事件监听。推荐用标志位方式在 `unload` 时禁用逻辑：
+`load` 中注册的事件必须在 `unload` 中用 `off()` 移除，否则重载后会残留旧监听器：
 
 ```ts
-private enabled = false
-
 async load() {
-    this.enabled = true
-    this.bot.event.message.onGroupMessage(this.handler)
+    this.api.napcat.on('message.group', this.onGroupMsg)
 }
 
 async unload() {
-    this.enabled = false
+    this.api.napcat.off('message.group', this.onGroupMsg)
 }
 
-private handler = async (...args) => {
-    if (!this.enabled) return
-    // 逻辑
+private onGroupMsg = async (event: any) => {
+    // ...
 }
 ```
 
