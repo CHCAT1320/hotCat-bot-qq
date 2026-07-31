@@ -5,6 +5,9 @@ hero:
   name: HotCat Bot
   text: 基于 node-napcat-ts 的 QQ 机器人框架
   tagline: 类型安全、功能完善、易于扩展
+  image:
+    src: /logo.png
+    alt: HotCat Bot
   actions:
     - theme: brand
       text: 快速开始

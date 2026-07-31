@@ -2,6 +2,10 @@
 
 基于 [node-napcat-ts](https://github.com/HkTeamX/node-napcat-ts) 的 TypeScript QQ 机器人框架。
 
+<p align="center">
+  <img src="logo.png" width="120" alt="HotCat Bot Logo">
+</p>
+
 ## 安装
 
 ```bash
