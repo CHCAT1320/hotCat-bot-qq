@@ -10,7 +10,11 @@ package-lock.json
 !tsconfig.node.json
 pnpm-lock.yaml
 napcat/
-plugins/aiSeeImg/
+
+# 非框架文件
+plugins/
+scripts
+indexOld.ts
 
 # vitepress
 docs/.vitepress/dist/
