@@ -1,27 +1,53 @@
 {
   "name": "hotcat-bot-qq",
   "version": "0.0.1",
-  "main": "index.js",
+  "description": "基于 node-napcat-ts 的 TypeScript QQ 机器人框架",
   "type": "module",
+  "main": "index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./message": "./message.ts",
+    "./botApi": "./botApi.ts",
+    "./botClient": "./botClient.ts",
+    "./botConsole": "./botConsole.ts",
+    "./botEvent": "./botEvent.ts"
+  },
+  "files": [
+    "index.ts",
+    "message.ts",
+    "botApi.ts",
+    "botClient.ts",
+    "botConsole.ts",
+    "botEvent.ts",
+    "tsconfig.json",
+    "tsconfig.node.json",
+    "LICENSE",
+    "README.md",
+    "logo.png"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs",
-    "postinstall": "node --experimental-strip-types scripts/patch-ppu-yolo.mjs || bun scripts/patch-ppu-yolo.mjs || echo 'skip patch: no node/bun'"
+    "docs:preview": "vitepress preview docs"
   },
+  "keywords": [
+    "qq",
+    "bot",
+    "napcat",
+    "onebot",
+    "typescript",
+    "chatbot"
+  ],
   "author": "CHCAT1320",
   "license": "MIT",
-  "description": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CHCAT1320/hotCat-bot-qq"
+  },
   "dependencies": {
-    "@napi-rs/canvas": "^1.0.0",
-    "@types/node": "^26.1.2",
-    "axios": "^1.18.1",
     "node-napcat-ts": "^0.4.25",
-    "node-schedule": "^2.1.1",
-    "onnxruntime-node": "^1.27.0",
-    "ppu-yolo-onnx-inference": "^2.0.0",
-    "weather-com-cn-api": "^1.0.1"
+    "@types/node": "^26.1.2"
   },
   "devDependencies": {
     "@types/node-schedule": "^2.1.8",
