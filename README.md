@@ -41,12 +41,11 @@ bot.event.message.onGroupMessage(async (bot, event) => {
 - **消息段构建** — `Message` 类支持文本、图片、表情、文件等所有消息类型
 - **彩色日志** — 内置 `BotConsole` 控制台日志，自动解析 CQ 码
 - **事件系统** — `BotEvent` 按类别分组暴露 message/messageSent/request/notice 事件
+- **定时任务** — `BotScheduler` 支持 cron 表达式、固定间隔、指定时间，轻松实现早安晚安等定时功能
 
 ## 文档
 
-完整文档 → [hotcat-bot-qq.docs.chcat1320.top](https://hotcat-bot-qq.docs.chcat1320.top)
-
-快速开始 → [docs/guide/getting-started.md](docs/guide/getting-started.md)
+完整文档 → [框架开发文档](https://hotcat-bot-qq.docs.chcat1320.top)
 
 ## 协议
 
