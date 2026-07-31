@@ -1,4 +1,4 @@
-﻿# BotApi
+# BotApi
 
 所有 napcat API 的统一封装，通过 `bot.api.xxx()` 调用。
 
@@ -13,8 +13,8 @@ async sendMessage(
 ```
 通用发送，根据 target 自动判断群聊/私聊。
 ```ts
-await bot.api.sendMessage({ group_id: 987654321 }, Message.text('hello'))
-await bot.api.sendMessage({ user_id: 10001 }, Message.image('./test.png'))
+await bot.api.sendMessage({ group_id: 12345678 }, Message.text('hello'))
+await bot.api.sendMessage({ user_id: 111222333 }, Message.image('./test.png'))
 ```
 
 ### sendGroupMessage(groupId, ...messages)
@@ -39,7 +39,7 @@ async sendForwardMsg(
 发送合并转发（通用），`nodes` 由 `Message.node()` / `Message.customNode()` 构建。
 ```ts
 const node = Message.node(event.message_id, event.user_id, event.sender.nickname)
-await bot.api.sendForwardMsg({ group_id: 987654321 }, [node])
+await bot.api.sendForwardMsg({ group_id: 12345678 }, [node])
 ```
 
 ### sendGroupForwardMsg(groupId, nodes)

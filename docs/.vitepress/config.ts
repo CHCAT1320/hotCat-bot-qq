@@ -54,6 +54,7 @@ export default defineConfig({
                             ],
                         },
                         { text: 'BotEvent', link: '/api/bot-event' },
+                        { text: 'BotScheduler', link: '/api/bot-scheduler' },
                     ],
                 },
                 {

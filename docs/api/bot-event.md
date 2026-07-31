@@ -1,4 +1,4 @@
-﻿# BotEvent
+# BotEvent
 
 事件监听入口，通过 `bot.event` 访问，按类别分组。
 

@@ -1,4 +1,4 @@
-﻿---
+---
 layout: home
 
 hero:
@@ -23,10 +23,10 @@ features:
   - icon: 📦
     title: 消息段构建
     details: Message 类提供链式消息段构建，支持文本、图片、表情、文件等所有类型
-  - icon: 🎨
-    title: 彩色日志
-    details: 内置 BotConsole 控制台日志，自动解析 CQ 码，带 ANSI 颜色高亮
   - icon: 🔌
     title: 事件系统
     details: BotEvent 按类别分组暴露 message/messageSent/notice/request 事件监听
+  - icon: ⏰
+    title: 定时任务
+    details: BotScheduler 支持 cron 表达式、间隔时间、指定时间，轻松实现定时功能
 ---

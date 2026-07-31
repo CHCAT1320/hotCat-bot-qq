@@ -2,6 +2,7 @@ import { NCWebsocketOptions } from 'node-napcat-ts';
 import { BotApi } from './botApi';
 import { BotConsole } from './botConsole';
 import { BotEvent } from './botEvent';
+import { BotScheduler } from './botScheduler';
 
 /**
  * Bot 客户端，封装连接、启动流程及 bot 自身信息。
@@ -25,6 +26,8 @@ export class BotClient {
     public api: BotApi;
     /** 事件监听入口 */
     public event: BotEvent;
+    /** 定时任务入口 */
+    public scheduler: BotScheduler;
     /** 登录后 bot 自身昵称 */
     public nickname: string | null;
     /** 登录后 bot 自身 QQ 号 */
@@ -34,6 +37,7 @@ export class BotClient {
         this.api = new BotApi(config);
         this.api.client = this;
         this.event = new BotEvent(this.api, this);
+        this.scheduler = new BotScheduler();
         this.nickname = null;
         this.id = null;
     }

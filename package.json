@@ -3,30 +3,44 @@
   "version": "0.0.1",
   "description": "基于 node-napcat-ts 的 TypeScript QQ 机器人框架",
   "type": "module",
-  "main": "index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "exports": {
-    ".": "./index.ts",
-    "./message": "./message.ts",
-    "./botApi": "./botApi.ts",
-    "./botClient": "./botClient.ts",
-    "./botConsole": "./botConsole.ts",
-    "./botEvent": "./botEvent.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./message": {
+      "types": "./dist/message.d.ts",
+      "default": "./dist/message.js"
+    },
+    "./botApi": {
+      "types": "./dist/botApi.d.ts",
+      "default": "./dist/botApi.js"
+    },
+    "./botClient": {
+      "types": "./dist/botClient.d.ts",
+      "default": "./dist/botClient.js"
+    },
+    "./botConsole": {
+      "types": "./dist/botConsole.d.ts",
+      "default": "./dist/botConsole.js"
+    },
+    "./botEvent": {
+      "types": "./dist/botEvent.d.ts",
+      "default": "./dist/botEvent.js"
+    }
   },
   "files": [
-    "index.ts",
-    "message.ts",
-    "botApi.ts",
-    "botClient.ts",
-    "botConsole.ts",
-    "botEvent.ts",
-    "tsconfig.json",
-    "tsconfig.node.json",
+    "dist",
     "LICENSE",
     "README.md",
     "logo.png"
   ],
   "scripts": {
+    "build": "tsc -p tsconfig.build.json",
     "test": "echo \"Error: no test specified\" && exit 1",
+    "prepublishOnly": "bun run build",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs"
@@ -47,6 +61,7 @@
   },
   "dependencies": {
     "node-napcat-ts": "^0.4.25",
+    "node-schedule": "^2.1.1",
     "@types/node": "^26.1.2"
   },
   "devDependencies": {

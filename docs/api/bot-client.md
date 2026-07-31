@@ -1,4 +1,4 @@
-﻿# BotClient
+# BotClient
 
 Bot 客户端，封装 WebSocket 连接、启动流程及 bot 自身信息。
 

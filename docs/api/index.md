@@ -1,4 +1,4 @@
-﻿# API 总览
+# API 总览
 
 HotCat Bot 所有公共 API 按类组织：
 
@@ -7,6 +7,7 @@ HotCat Bot 所有公共 API 按类组织：
 | [BotClient](/api/bot-client) | `new BotClient(config)` | Bot 客户端，封装连接和启动 |
 | [BotApi](/api/bot-api) | `bot.api.xxx()` | 所有 napcat API 的统一封装 |
 | [BotEvent](/api/bot-event) | `bot.event.xxx()` | 事件监听，按类别分组 |
+| [BotScheduler](/api/bot-scheduler) | `bot.scheduler.xxx()` | 定时任务调度 |
 | [Message](/api/message) | `Message.xxx()` | 消息段构建器 |
 
 ## 架构
@@ -20,6 +21,7 @@ BotClient
  │    ├── messageSent: MessageSent    (发出的消息回执)
  │    ├── request: RequestEvent       (加好友/加群请求)
  │    └── notice: NoticeEvent         (通知事件)
+ ├── scheduler: BotScheduler → bot.scheduler.cron(...)
  ├── nickname: string     (bot 昵称)
  └── id: number           (bot QQ 号)
 ```
@@ -54,3 +56,13 @@ BotClient
 | 发送回执 | `bot.event.messageSent` | 6 |
 | 请求 | `bot.event.request` | 4 |
 | 通知 | `bot.event.notice` | 16 |
+
+### BotScheduler 定时任务
+
+| 方法 | 说明 | 示例 |
+|---|---|---|
+| `cron()` | cron 表达式 | `cron('0 8 * * *', fn)` |
+| `every()` | 固定间隔 | `every('5m', fn)` |
+| `at()` | 指定时间 | `at('08:00', fn)` |
+| `cancel()` | 取消任务 | `cancel(id)` |
+| `cancelAll()` | 取消全部 | `cancelAll()` |

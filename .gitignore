@@ -8,8 +8,12 @@ package-lock.json
 !package.json
 !tsconfig.json
 !tsconfig.node.json
+!tsconfig.build.json
 pnpm-lock.yaml
 napcat/
+
+# 构建产物
+dist/
 
 # 非框架文件
 plugins/

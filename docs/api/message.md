@@ -1,4 +1,4 @@
-﻿# Message
+# Message
 
 消息段构建器，用于构造发送内容。搭配 `bot.api.sendMessage()` / `bot.api.sendGroupMessage()` 等方法使用。
 
@@ -200,14 +200,14 @@ toCQ(): string
 import { Message } from 'hotcat-bot-qq'
 
 // 回复 + @ + 复读
-await bot.api.sendGroupMessage(987654321,
+await bot.api.sendGroupMessage(12345678,
     Message.reply(event.message_id),
     Message.text('你发了: '),
     ...event.message.map(seg => Message.from(seg))
 )
 
 // 文本 + 图片
-await bot.api.sendGroupMessage(987654321,
+await bot.api.sendGroupMessage(12345678,
     Message.text('看这张图:'),
     Message.image('https://example.com/img.png')
 )
@@ -228,7 +228,7 @@ const node = Message.node(
 )
 
 // 发送合并转发
-await bot.api.sendGroupForwardMsg(987654321, [node])
+await bot.api.sendGroupForwardMsg(12345678, [node])
 
 
 // ─── 方式二：自定义内容 ───
@@ -256,7 +256,7 @@ const node2 = Message.customNode(
 )
 
 // 一次性发送多个节点（显示为多条转发消息）
-await bot.api.sendGroupForwardMsg(987654321, [node1, node2])
+await bot.api.sendGroupForwardMsg(12345678, [node1, node2])
 
 
 // ─── 方式三：混合使用 ───
@@ -269,13 +269,13 @@ const customNode = Message.customNode(
     bot.nickname!,
 )
 
-await bot.api.sendGroupForwardMsg(987654321, [refNode, customNode])
+await bot.api.sendGroupForwardMsg(12345678, [refNode, customNode])
 ```
 
 :::warning 不要伪造他人消息
 `customNode()` 的 `user_id` 和 `nickname` 决定了转发合并消息中**每条消息显示来自谁**。
 
-- 比如传入 `user_id: 10001, nickname: '张三'`，群友看到的转发消息里就会有一条 **"张三说：..."**。如果张三本人并没有说过这句话，接收者就会被**误导**。
+- 比如传入 `user_id: 111222333, nickname: '张三'`，群友看到的转发消息里就会有一条 **"张三说：..."**。如果张三本人并没有说过这句话，接收者就会被**误导**。
 - **请使用 bot 自身 QQ 和昵称**（`bot.id` / `bot.nickname`），让转发消息明确标注来自 bot。
 - 如需展示**真实用户**的消息内容，使用 `node()` 引用实际存在的消息 ID。
 :::

@@ -1,4 +1,4 @@
-﻿# 快速开始
+# 快速开始
 
 ## 环境要求
 
@@ -64,7 +64,7 @@ bun bot.ts
 ```ts
 bot.event.message.onGroupMessage(async (bot, event) => {
     // 只处理指定群
-    if (event.group_id !== 987654321) return
+    if (event.group_id !== 12345678) return
 
     // 回复消息
     await bot.api.sendGroupMessage(event.group_id,
@@ -90,14 +90,14 @@ bot.event.message.onPrivateMessage(async (bot, event) => {
 
 ```ts
 // 群聊
-await bot.api.sendGroupMessage(987654321,
+await bot.api.sendGroupMessage(12345678,
     Message.text('Hello'),
     Message.image('./test.png'),
-    Message.at(10001)
+    Message.at(111222333)
 )
 
 // 私聊
-await bot.api.sendMessage({ user_id: 10001 },
+await bot.api.sendMessage({ user_id: 111222333 },
     Message.text('你好')
 )
 ```
@@ -137,6 +137,25 @@ bot.event.request.onFriend(async (bot, event) => {
 bot.event.request.onGroupInvite(async (bot, event) => {
     // 同意
     await bot.api.handleGroupAddRequest(event.flag, true)
+})
+```
+
+### 定时任务
+
+```ts
+// 每天 8:00 早安
+bot.scheduler.cron('0 8 * * *', () => {
+    bot.api.sendGroupMessage(12345678, Message.text('早上好'))
+})
+
+// 每 5 分钟执行
+bot.scheduler.every('5m', () => {
+    console.log('定时检查...')
+})
+
+// 指定时刻（一次性）
+bot.scheduler.at('23:59', () => {
+    bot.api.sendGroupMessage(12345678, Message.text('晚安'))
 })
 ```
 
