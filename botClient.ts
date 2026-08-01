@@ -3,6 +3,9 @@ import { BotApi } from './botApi';
 import { BotConsole } from './botConsole';
 import { BotEvent } from './botEvent';
 import { BotScheduler } from './botScheduler';
+import { existsSync, mkdirSync, cpSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
 
 /** Bot 配置 */
 export interface BotConfig {
@@ -61,7 +64,21 @@ export class BotClient {
         } catch (e) {
             new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
         }
+        this.seedDefaultPlugin();
         await this.plugin.scan('./plugins');
         this.plugin.watch('./plugins');
+    }
+
+    private seedDefaultPlugin(): void {
+        const dest = join(process.cwd(), 'plugins', 'hotCatPlugin')
+        if (existsSync(dest)) return
+
+        const selfDir = dirname(fileURLToPath(import.meta.url))
+        const src = join(selfDir, '..', 'plugins', 'hotCatPlugin')
+        if (!existsSync(src)) return
+
+        mkdirSync(join(process.cwd(), 'plugins'), { recursive: true })
+        cpSync(src, dest, { recursive: true })
+        new BotConsole('system', '默认插件 hotCatPlugin 已创建').log()
     }
 }

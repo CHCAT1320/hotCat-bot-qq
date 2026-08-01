@@ -17,7 +17,6 @@ dist/
 
 # 非框架文件
 scripts
-!scripts/postinstall.mjs
 indexOld.ts
 
 # vitepress
