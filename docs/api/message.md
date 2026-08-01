@@ -243,11 +243,11 @@ const content2 = [
     Message.face(333),
 ]
 
-// 创建转发节点（user_id/nickname 请用 bot 自身信息）
+// 创建转发节点（user_id 决定头像，nickname 决定昵称，都用 bot 自身信息）
 const node1 = Message.customNode(
     content1,
-    bot.id!,        // 用 bot 自己的 QQ
-    bot.nickname!,  // 用 bot 自己的昵称
+    bot.id!,        // 决定头像显示
+    bot.nickname!,  // 决定昵称显示
 )
 const node2 = Message.customNode(
     content2,
@@ -273,9 +273,9 @@ await bot.api.sendGroupForwardMsg(12345678, [refNode, customNode])
 ```
 
 :::warning 不要伪造他人消息
-`customNode()` 的 `user_id` 和 `nickname` 决定了转发合并消息中**每条消息显示来自谁**。
+`customNode()` 中 `user_id` 决定转发消息的**头像**，`nickname` 决定**昵称**。两者独立控制。
 
-- 比如传入 `user_id: 111222333, nickname: '张三'`，群友看到的转发消息里就会有一条 **"张三说：..."**。如果张三本人并没有说过这句话，接收者就会被**误导**。
-- **请使用 bot 自身 QQ 和昵称**（`bot.id` / `bot.nickname`），让转发消息明确标注来自 bot。
-- 如需展示**真实用户**的消息内容，使用 `node()` 引用实际存在的消息 ID。
+- 比如 `customNode([...], 111222333, '张三')`：转发里出现**张三的头像** + "张三"，群友会以为是张三本人说的话，造成**误导**。
+- **请使用 bot 自身信息**（`bot.id` / `bot.nickname`），让头像和昵称明确来自 bot。
+- 如需展示**真实用户的真实消息**，使用 `node()` 引用实际存在的消息 ID。
 :::
