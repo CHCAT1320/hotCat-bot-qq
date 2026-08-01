@@ -107,13 +107,63 @@ private onGroupMsg = async (event: any) => {
 }
 ```
 
+## 完整示例：每日签到
+
+每天 0:00 遍历所有群聊发送签到消息。
+
+```ts
+import { PluginBase } from 'hotcat-bot-qq/plugin'
+import { BotApi } from 'hotcat-bot-qq/botApi'
+import { BotClient } from 'hotcat-bot-qq/botClient'
+import { Message } from 'hotcat-bot-qq/message'
+
+export class SignPlugin extends PluginBase {
+    static meta = {
+        name: 'sign',
+        version: '1.0.0',
+        description: '每日 0 点群签到',
+        author: 'your-name',
+    }
+
+    private timerId = 0
+
+    static create(api: BotApi, bot: BotClient) {
+        return new SignPlugin(api, bot)
+    }
+
+    async load() {
+        // 每天 0:00 执行
+        this.timerId = this.bot.scheduler.cron('0 0 * * *', this.doSign)
+    }
+
+    async unload() {
+        this.bot.scheduler.cancel(this.timerId)
+    }
+
+    private doSign = async () => {
+        const groups = await this.api.getGroupList()
+
+        for (const g of groups) {
+            try {
+                await this.api.sendGroupSign(g.group_id)
+            } catch {}
+        }
+    }
+}
+
+```
+
+:::tip 时间偏移
+`cron('0 0 * * *')` 基于 bot 所在机器的系统时钟。如果机器时间与 QQ 服务器时间偏差较大，签到可能失败。建议将 cron 设为 `'0 0 0 * * *'` 增加秒级延迟、或在 cron 回调中加一个随机延时（如 `setTimeout(fn, Math.random() * 30000)`），避免瞬时集中请求。
+:::
+
 ## 目录结构
 
 ```
 plugins/
-├── test/
+├── hotCatPlugin/
 │   └── index.ts
-├── hello/
+├── sign/
 │   └── index.ts
 └── utils/
     └── helper.ts       # 不会被自动加载（无 index.ts）

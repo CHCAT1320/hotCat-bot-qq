@@ -7,72 +7,77 @@ export default defineConfig({
     themeConfig: {
         search: {
             provider: 'local',
+            options: {
+                translations: {
+                    button: {
+                        buttonText: '搜索文档',
+                        buttonAriaLabel: '搜索文档',
+                    },
+                    modal: {
+                        noResultsText: '无结果',
+                        resetButtonTitle: '清除',
+                        footer: {
+                            selectText: '选择',
+                            navigateText: '切换',
+                            closeText: '关闭',
+                        },
+                    },
+                },
+            },
         },
         nav: [
             { text: '首页', link: '/' },
             { text: '快速开始', link: '/guide/getting-started' },
             { text: 'API', link: '/api/' },
         ],
-        sidebar: {
-            '/guide/': [
-                {
-                    text: '指南',
-                    items: [
-                        { text: '快速开始', link: '/guide/getting-started' },
-                    ],
-                },
-            ],
-            '/api/': [
-                {
-                    text: '总览',
-                    link: '/api/',
-                },
-                {
-                    text: '核心类',
-                    collapsed: false,
-                    items: [
-                        { text: 'BotClient', link: '/api/bot-client' },
-                        {
-                            text: 'BotApi',
-                            link: '/api/bot-api',
-                            collapsed: false,
-                            items: [
-                                { text: '消息发送', link: '/api/bot-api#消息发送' },
-                                { text: '消息管理', link: '/api/bot-api#消息管理' },
-                                { text: '群管理', link: '/api/bot-api#群管理' },
-                                { text: '群公告', link: '/api/bot-api#群公告' },
-                                { text: '群信息查询', link: '/api/bot-api#群信息查询' },
-                                { text: '精华消息', link: '/api/bot-api#精华消息' },
-                                { text: '用户 / 好友', link: '/api/bot-api#用户-好友' },
-                                { text: '群互动', link: '/api/bot-api#群互动' },
-                                { text: '文件 / 资源', link: '/api/bot-api#文件-资源' },
-                                { text: '群文件管理', link: '/api/bot-api#群文件管理' },
-                                { text: '收藏', link: '/api/bot-api#收藏' },
-                                { text: '推荐 / 分享', link: '/api/bot-api#推荐-分享' },
-                                { text: 'AI', link: '/api/bot-api#ai' },
-                                { text: '系统', link: '/api/bot-api#系统' },
-                            ],
-                        },
-                        { text: 'BotEvent', link: '/api/bot-event' },
-                        { text: 'BotScheduler', link: '/api/bot-scheduler' },
-                        { text: 'BotPluginSystem', link: '/api/bot-plugin' },
-                    ],
-                },
-                {
-                    text: '消息段',
-                    collapsed: false,
-                    items: [
-                        { text: 'Message', link: '/api/message' },
-                    ],
-                },
-            ],
-        },
-        '/guide/': [
+        sidebar: [
             {
                 text: '指南',
                 items: [
                     { text: '快速开始', link: '/guide/getting-started' },
                     { text: '插件开发', link: '/guide/plugin-dev' },
+                ],
+            },
+            {
+                text: '总览',
+                link: '/api/',
+            },
+            {
+                text: '核心类',
+                collapsed: false,
+                items: [
+                    { text: 'BotClient', link: '/api/bot-client' },
+                    {
+                        text: 'BotApi',
+                        link: '/api/bot-api',
+                        collapsed: false,
+                        items: [
+                            { text: '消息发送', link: '/api/bot-api#消息发送' },
+                            { text: '消息管理', link: '/api/bot-api#消息管理' },
+                            { text: '群管理', link: '/api/bot-api#群管理' },
+                            { text: '群公告', link: '/api/bot-api#群公告' },
+                            { text: '群信息查询', link: '/api/bot-api#群信息查询' },
+                            { text: '精华消息', link: '/api/bot-api#精华消息' },
+                            { text: '用户 / 好友', link: '/api/bot-api#用户-好友' },
+                            { text: '群互动', link: '/api/bot-api#群互动' },
+                            { text: '文件 / 资源', link: '/api/bot-api#文件-资源' },
+                            { text: '群文件管理', link: '/api/bot-api#群文件管理' },
+                            { text: '收藏', link: '/api/bot-api#收藏' },
+                            { text: '推荐 / 分享', link: '/api/bot-api#推荐-分享' },
+                            { text: 'AI', link: '/api/bot-api#ai' },
+                            { text: '系统', link: '/api/bot-api#系统' },
+                        ],
+                    },
+                    { text: 'BotEvent', link: '/api/bot-event' },
+                    { text: 'BotScheduler', link: '/api/bot-scheduler' },
+                    { text: 'BotPluginSystem', link: '/api/bot-plugin' },
+                ],
+            },
+            {
+                text: '消息段',
+                collapsed: false,
+                items: [
+                    { text: 'Message', link: '/api/message' },
                 ],
             },
         ],
