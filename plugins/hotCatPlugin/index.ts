@@ -20,14 +20,14 @@ export class HotCatPlugin extends PluginBase {
 
     async load() {
         this.startTime = Date.now()
-        this.api.napcat.on('message.group', this.onGroupMsg)
+        this.bot.event.message.onGroupMessage(this.onGroupMsg)
     }
 
     async unload() {
-        this.api.napcat.off('message.group', this.onGroupMsg)
+        this.bot.event.message.offGroupMessage(this.onGroupMsg)
     }
 
-    private onGroupMsg = async (event: any) => {
+    private onGroupMsg = async (_bot: BotClient, event: any) => {
         const msg = event.raw_message.trim()
 
         if (msg === '#hotCat' || msg === '#hotcat') {

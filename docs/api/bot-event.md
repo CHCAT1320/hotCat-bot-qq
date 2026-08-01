@@ -50,6 +50,10 @@ onPrivateGroup(fn: (bot: BotClient, event: PrivateMessage) => any): void
 ```
 仅监听群临时私聊（细粒度）。
 
+:::tip 事件清理
+每个 `onXxx(fn)` 都有对应的 `offXxx(fn)`，传入**相同的函数引用**即可移除。用于插件 `unload()` 中清理事件。
+:::
+
 ## MessageSent
 
 ```ts
@@ -88,6 +92,8 @@ onPrivateGroup(fn: (bot: BotClient, event: PrivateGroupMessageSelf) => any): voi
 ```
 群临时私聊发送回执（细粒度）。
 
+> 每个 `onXxx(fn)` 都有对应的 `offXxx(fn)`。
+
 ## RequestEvent
 
 ```ts
@@ -117,6 +123,8 @@ onGroupInvite(fn: (bot: BotClient, event: RequestGroupInvite) => any): void
 onGroupRequest(fn: (bot: BotClient, event: RequestGroup) => any): void
 ```
 所有群请求（加群 + 邀请），`event.sub_type` 区分 `'add'` / `'invite'`。
+
+> 每个 `onXxx(fn)` 都有对应的 `offXxx(fn)`。
 
 ## NoticeEvent
 
@@ -219,3 +227,5 @@ onProfileLike(fn: (bot: BotClient, event: NotifyProfileLike) => any): void
 onBotOffline(fn: (bot: BotClient, event: BotOffline) => any): void
 ```
 bot 离线。
+
+> 每个 `onXxx(fn)` 都有对应的 `offXxx(fn)`。

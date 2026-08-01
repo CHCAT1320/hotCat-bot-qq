@@ -29,7 +29,7 @@ export class HelloPlugin extends PluginBase {
     }
 
     async unload() {
-        // TODO: 移除事件监听
+        this.bot.event.message.offGroupMessage(this.onGroupMsg)
     }
 
     private onGroupMsg = async (_bot: BotClient, event: any) => {
@@ -91,21 +91,48 @@ import { Message } from 'hotcat-bot-qq/message'
 
 ## 卸载清理
 
-`load` 中注册的事件必须在 `unload` 中用 `off()` 移除，否则重载后会残留旧监听器：
+### 为什么要清理
+
+热重载 `bot.plugin.reload(name)` 的内部流程是 **`unload()` → `load()`**。如果 `unload()` 没有清理干净，旧的事件监听器、定时器会继续残留，`load()` 再注册一次，导致**同一事件触发多次回调**——消息重复回复、定时任务叠加执行。
+
+### 需要清理的资源
+
+| 资源 | load 中创建 | unload 中释放 |
+|---|---|---|
+| 消息事件 | `this.bot.event.message.onGroupMessage(fn)` | `this.bot.event.message.offGroupMessage(fn)` |
+| 定时任务 | `this.bot.scheduler.cron(...)` | `this.bot.scheduler.cancel(id)` |
+| 定时任务 | `this.bot.scheduler.every(...)` | `this.bot.scheduler.cancel(id)` |
+| 外部连接 | `connect()` / `open()` | `disconnect()` / `close()` |
+
+### 完整示例
 
 ```ts
-async load() {
-    this.api.napcat.on('message.group', this.onGroupMsg)
-}
+export class MyPlugin extends PluginBase {
+    private timerId = 0
 
-async unload() {
-    this.api.napcat.off('message.group', this.onGroupMsg)
-}
+    async load() {
+        // 1. 注册事件
+        this.bot.event.message.onGroupMessage(this.onGroupMsg)
 
-private onGroupMsg = async (event: any) => {
-    // ...
+        // 2. 启动定时 —— 保存 id 以便取消
+        this.timerId = this.bot.scheduler.every('1h', this.onTick)
+    }
+
+    async unload() {
+        // 1. 移除事件 —— 使用对应的 off 方法
+        this.bot.event.message.offGroupMessage(this.onGroupMsg)
+
+        // 2. 取消定时
+        this.bot.scheduler.cancel(this.timerId)
+    }
+
+    // ⚠️ 必须用箭头函数属性，保证 this 绑定且引用唯一
+    private onGroupMsg = async (event: any) => { ... }
+    private onTick = () => { ... }
 }
 ```
+
+> 为什么用箭头函数属性（`private fn = () => {}`）而不是方法（`private fn() {}`）？因为 `off()` 需要**完全相同的函数引用**才能移除。箭头函数属性在类实例化时绑定到 `this`，且引用不会变化。
 
 ## 完整示例：每日签到
 

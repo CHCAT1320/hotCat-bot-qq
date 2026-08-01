@@ -4,265 +4,321 @@ import type { BotClient } from './botClient';
 import type { BotApi } from './botApi';
 
 /**
- * 当接收到消息时触发的事件。
- *
- * @example
- * ```ts
- * bot.event.message.onGroupMessage(async (bot, event) => {
- *     await bot.api.sendGroupMessage(event.group_id, Message.text('收到'));
- * });
- * ```
+ * 接收到的事件处理（别人发的消息）。
  */
 export class MessageEvent {
     private napcat: NCWebsocket;
     private client: BotClient;
+    private wrappers = new Map<Function, (e: any) => Promise<void>>();
 
     constructor(napcat: NCWebsocket, client: BotClient) {
         this.napcat = napcat;
         this.client = client;
     }
 
-    /**
-     * 注册群消息事件回调
-     * @param fn - 回调 `(bot, event) => any`
-     */
     onGroupMessage(fn: (bot: BotClient, event: GroupMessage) => any): void {
-        this.napcat.on('message.group', async (event: GroupMessage) => {
+        const w = async (event: GroupMessage) => {
             try {
                 new BotConsole('groupMessage', event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
-        });
+        };
+        this.wrappers.set(fn, w);
+        (this.napcat as any).on('message.group', w);
     }
 
-    /**
-     * 注册群消息普通事件回调
-     * @param fn - 回调 `(bot, event) => any`
-     */
+    offGroupMessage(fn: Function): void {
+        const w = this.wrappers.get(fn);
+        if (w) {
+            (this.napcat as any).off('message.group', w);
+            this.wrappers.delete(fn);
+        }
+    }
+
     onGroupNormal(fn: (bot: BotClient, event: GroupMessage) => any): void {
-        this.napcat.on('message.group.normal', async (event: GroupMessage) => {
+        const w = async (event: GroupMessage) => {
             try {
                 new BotConsole('groupMessage', event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
-        });
+        };
+        this.wrappers.set(fn, w);
+        (this.napcat as any).on('message.group.normal', w);
     }
 
-    /**
-     * 注册私聊消息事件回调
-     * @param fn - 回调 `(bot, event) => any`
-     */
+    offGroupNormal(fn: Function): void {
+        const w = this.wrappers.get(fn);
+        if (w) {
+            (this.napcat as any).off('message.group.normal', w);
+            this.wrappers.delete(fn);
+        }
+    }
+
     onPrivateMessage(fn: (bot: BotClient, event: PrivateMessage) => any): void {
-        this.napcat.on('message.private', async (event: PrivateMessage) => {
+        const w = async (event: PrivateMessage) => {
             try {
                 new BotConsole('privateMessage', event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
-        });
+        };
+        this.wrappers.set(fn, w);
+        (this.napcat as any).on('message.private', w);
     }
 
-    /**
-     * 注册私聊消息好友事件回调
-     * @param fn - 回调 `(bot, event) => any`
-     */
+    offPrivateMessage(fn: Function): void {
+        const w = this.wrappers.get(fn);
+        if (w) {
+            (this.napcat as any).off('message.private', w);
+            this.wrappers.delete(fn);
+        }
+    }
+
     onPrivateFriend(fn: (bot: BotClient, event: PrivateMessage) => any): void {
-        this.napcat.on('message.private.friend', async (event: PrivateMessage) => {
+        const w = async (event: PrivateMessage) => {
             try {
                 new BotConsole('privateMessage', event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
-        });
+        };
+        this.wrappers.set(fn, w);
+        (this.napcat as any).on('message.private.friend', w);
     }
 
-    /**
-     * 注册私聊消息群临时事件回调
-     * @param fn - 回调 `(bot, event) => any`
-     */
+    offPrivateFriend(fn: Function): void {
+        const w = this.wrappers.get(fn);
+        if (w) {
+            (this.napcat as any).off('message.private.friend', w);
+            this.wrappers.delete(fn);
+        }
+    }
+
     onPrivateGroup(fn: (bot: BotClient, event: PrivateMessage) => any): void {
-        this.napcat.on('message.private.group', async (event: PrivateMessage) => {
+        const w = async (event: PrivateMessage) => {
             try {
                 new BotConsole('privateMessage', event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
-        });
+        };
+        this.wrappers.set(fn, w);
+        (this.napcat as any).on('message.private.group', w);
+    }
+
+    offPrivateGroup(fn: Function): void {
+        const w = this.wrappers.get(fn);
+        if (w) {
+            (this.napcat as any).off('message.private.group', w);
+            this.wrappers.delete(fn);
+        }
     }
 }
 
 /**
- * 当 bot 自身发出消息后的事件。
- *
- * @example
- * ```ts
- * bot.event.messageSent.onGroupSent(async (bot, event) => {
- *     console.log('群消息已发送:', event.message_id);
- * });
- * ```
+ * bot 自身发出的消息事件（发送成功后的回执）。
  */
 export class MessageSent {
     private napcat: NCWebsocket;
     private client: BotClient;
+    private wrappers = new Map<Function, (e: any) => Promise<void>>();
 
     constructor(napcat: NCWebsocket, client: BotClient) {
         this.napcat = napcat;
         this.client = client;
     }
 
-    /**
-     * 注册群消息发送回执
-     * @param fn - 回调 `(bot, event) => any`
-     */
     onGroupSent(fn: (bot: BotClient, event: GroupMessageSelf) => any): void {
-        this.napcat.on('message_sent.group', async (event: GroupMessageSelf) => {
+        const w = async (event: GroupMessageSelf) => {
             try {
                 new BotConsole('groupMessageSelf', event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
-        });
+        };
+        this.wrappers.set(fn, w);
+        (this.napcat as any).on('message_sent.group', w);
     }
 
-    /**
-     * 注册群消息发送回执（仅普通消息）
-     * @param fn - 回调 `(bot, event) => any`
-     */
+    offGroupSent(fn: Function): void {
+        const w = this.wrappers.get(fn);
+        if (w) {
+            (this.napcat as any).off('message_sent.group', w);
+            this.wrappers.delete(fn);
+        }
+    }
+
     onGroupNormal(fn: (bot: BotClient, event: GroupMessageSelf) => any): void {
-        this.napcat.on('message_sent.group.normal', async (event: GroupMessageSelf) => {
+        const w = async (event: GroupMessageSelf) => {
             try {
                 new BotConsole('groupMessageSelf', event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
-        });
+        };
+        this.wrappers.set(fn, w);
+        (this.napcat as any).on('message_sent.group.normal', w);
     }
 
-    /**
-     * 注册私聊消息发送回执
-     * @param fn - 回调 `(bot, event) => any`
-     */
+    offGroupNormal(fn: Function): void {
+        const w = this.wrappers.get(fn);
+        if (w) {
+            (this.napcat as any).off('message_sent.group.normal', w);
+            this.wrappers.delete(fn);
+        }
+    }
+
     onPrivateSent(fn: (bot: BotClient, event: PrivateMessageSelf) => any): void {
-        this.napcat.on('message_sent.private', async (event: PrivateMessageSelf) => {
+        const w = async (event: PrivateMessageSelf) => {
             try {
                 new BotConsole('privateMessageSelf', event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
-        });
+        };
+        this.wrappers.set(fn, w);
+        (this.napcat as any).on('message_sent.private', w);
     }
 
-    /**
-     * 注册私聊好友消息发送回执
-     * @param fn - 回调 `(bot, event) => any`
-     */
+    offPrivateSent(fn: Function): void {
+        const w = this.wrappers.get(fn);
+        if (w) {
+            (this.napcat as any).off('message_sent.private', w);
+            this.wrappers.delete(fn);
+        }
+    }
+
     onPrivateFriend(fn: (bot: BotClient, event: PrivateFriendMessageSelf) => any): void {
-        this.napcat.on('message_sent.private.friend', async (event: PrivateFriendMessageSelf) => {
+        const w = async (event: PrivateFriendMessageSelf) => {
             try {
                 new BotConsole('privateMessageSelf', event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
-        });
+        };
+        this.wrappers.set(fn, w);
+        (this.napcat as any).on('message_sent.private.friend', w);
     }
 
-    /**
-     * 注册私聊群临时消息发送回执
-     * @param fn - 回调 `(bot, event) => any`
-     */
+    offPrivateFriend(fn: Function): void {
+        const w = this.wrappers.get(fn);
+        if (w) {
+            (this.napcat as any).off('message_sent.private.friend', w);
+            this.wrappers.delete(fn);
+        }
+    }
+
     onPrivateGroup(fn: (bot: BotClient, event: PrivateGroupMessageSelf) => any): void {
-        this.napcat.on('message_sent.private.group', async (event: PrivateGroupMessageSelf) => {
+        const w = async (event: PrivateGroupMessageSelf) => {
             try {
                 new BotConsole('privateMessageSelf', event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
-        });
+        };
+        this.wrappers.set(fn, w);
+        (this.napcat as any).on('message_sent.private.group', w);
+    }
+
+    offPrivateGroup(fn: Function): void {
+        const w = this.wrappers.get(fn);
+        if (w) {
+            (this.napcat as any).off('message_sent.private.group', w);
+            this.wrappers.delete(fn);
+        }
     }
 }
 
 /**
  * 请求事件监听（加好友、加群、邀请入群）。
- *
- * @example
- * ```ts
- * bot.event.request.onFriend(async (bot, event) => {
- *     await bot.api.handleFriendAddRequest(event.flag, true);
- * });
- * ```
  */
 export class RequestEvent {
     private napcat: NCWebsocket;
     private client: BotClient;
+    private wrappers = new Map<Function, (e: any) => Promise<void>>();
 
     constructor(napcat: NCWebsocket, client: BotClient) {
         this.napcat = napcat;
         this.client = client;
     }
 
-    /**
-     * 注册加好友请求回调
-     * @param fn - 回调 `(bot, event) => any`，event.flag 可传给 handleFriendAddRequest
-     */
     onFriend(fn: (bot: BotClient, event: RequestFriend) => any): void {
-        this.napcat.on('request.friend', async (event: RequestFriend) => {
+        const w = async (event: RequestFriend) => {
             try {
                 new BotConsole('requestFriend', event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
-        });
+        };
+        this.wrappers.set(fn, w);
+        (this.napcat as any).on('request.friend', w);
     }
 
-    /**
-     * 注册加群请求回调
-     * @param fn - 回调 `(bot, event) => any`，event.flag 可传给 handleGroupAddRequest
-     */
+    offFriend(fn: Function): void {
+        const w = this.wrappers.get(fn);
+        if (w) {
+            (this.napcat as any).off('request.friend', w);
+            this.wrappers.delete(fn);
+        }
+    }
+
     onGroupAdd(fn: (bot: BotClient, event: RequestGroupAdd) => any): void {
-        this.napcat.on('request.group.add', async (event: RequestGroupAdd) => {
+        const w = async (event: RequestGroupAdd) => {
             try {
                 new BotConsole('requestGroupAdd', event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
-        });
+        };
+        this.wrappers.set(fn, w);
+        (this.napcat as any).on('request.group.add', w);
     }
 
-    /**
-     * 注册邀请入群回调
-     * @param fn - 回调 `(bot, event) => any`
-     */
+    offGroupAdd(fn: Function): void {
+        const w = this.wrappers.get(fn);
+        if (w) {
+            (this.napcat as any).off('request.group.add', w);
+            this.wrappers.delete(fn);
+        }
+    }
+
     onGroupInvite(fn: (bot: BotClient, event: RequestGroupInvite) => any): void {
-        this.napcat.on('request.group.invite', async (event: RequestGroupInvite) => {
+        const w = async (event: RequestGroupInvite) => {
             try {
                 new BotConsole('requestGroupInvite', event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
-        });
+        };
+        this.wrappers.set(fn, w);
+        (this.napcat as any).on('request.group.invite', w);
     }
 
-    /**
-     * 注册所有群请求回调（加群 + 邀请）
-     * @param fn - 回调 `(bot, event) => any`
-     */
+    offGroupInvite(fn: Function): void {
+        const w = this.wrappers.get(fn);
+        if (w) {
+            (this.napcat as any).off('request.group.invite', w);
+            this.wrappers.delete(fn);
+        }
+    }
+
     onGroupRequest(fn: (bot: BotClient, event: RequestGroup) => any): void {
-        this.napcat.on('request.group', async (event: RequestGroup) => {
+        const w = async (event: RequestGroup) => {
             try {
                 const type = event.sub_type === 'add' ? 'requestGroupAdd' : 'requestGroupInvite';
                 new BotConsole(type, event).log();
@@ -270,167 +326,370 @@ export class RequestEvent {
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
-        });
+        };
+        this.wrappers.set(fn, w);
+        (this.napcat as any).on('request.group', w);
+    }
+
+    offGroupRequest(fn: Function): void {
+        const w = this.wrappers.get(fn);
+        if (w) {
+            (this.napcat as any).off('request.group', w);
+            this.wrappers.delete(fn);
+        }
     }
 }
 
 /**
  * 通知事件监听（好友添加、群成员变动、禁言、撤回等）。
- *
- * @example
- * ```ts
- * bot.event.notice.onFriendAdd(async (bot, event) => { ... });
- * bot.event.notice.onGroupIncrease(async (bot, event) => { ... });
- * ```
  */
 export class NoticeEvent {
     private napcat: NCWebsocket;
     private client: BotClient;
+    private wrappers = new Map<Function, (e: any) => Promise<void>>();
 
     constructor(napcat: NCWebsocket, client: BotClient) {
         this.napcat = napcat;
         this.client = client;
     }
 
-    /** 好友添加 */
     onFriendAdd(fn: (bot: BotClient, event: FriendAdd) => any): void {
-        this.napcat.on('notice.friend_add', async (event: FriendAdd) => {
-            try { new BotConsole('notice', event).log(); await fn(this.client, event); }
-            catch (e) { new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log(); }
-        });
+        const w = async (event: FriendAdd) => {
+            try {
+                new BotConsole('notice', event).log();
+                await fn(this.client, event);
+            } catch (e) {
+                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+            }
+        };
+        this.wrappers.set(fn, w);
+        (this.napcat as any).on('notice.friend_add', w);
     }
 
-    /** 私聊消息撤回 */
+    offFriendAdd(fn: Function): void {
+        const w = this.wrappers.get(fn);
+        if (w) {
+            (this.napcat as any).off('notice.friend_add', w);
+            this.wrappers.delete(fn);
+        }
+    }
+
     onFriendRecall(fn: (bot: BotClient, event: FriendRecall) => any): void {
-        this.napcat.on('notice.friend_recall', async (event: FriendRecall) => {
-            try { new BotConsole('notice', event).log(); await fn(this.client, event); }
-            catch (e) { new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log(); }
-        });
+        const w = async (event: FriendRecall) => {
+            try {
+                new BotConsole('notice', event).log();
+                await fn(this.client, event);
+            } catch (e) {
+                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+            }
+        };
+        this.wrappers.set(fn, w);
+        (this.napcat as any).on('notice.friend_recall', w);
     }
 
-    /** 群管理员变动（设置/取消） */
+    offFriendRecall(fn: Function): void {
+        const w = this.wrappers.get(fn);
+        if (w) {
+            (this.napcat as any).off('notice.friend_recall', w);
+            this.wrappers.delete(fn);
+        }
+    }
+
     onGroupAdmin(fn: (bot: BotClient, event: GroupAdminSet | GroupAdminUnset) => any): void {
-        this.napcat.on('notice.group_admin', async (event: GroupAdminSet | GroupAdminUnset) => {
-            try { new BotConsole('notice', event).log(); await fn(this.client, event); }
-            catch (e) { new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log(); }
-        });
+        const w = async (event: GroupAdminSet | GroupAdminUnset) => {
+            try {
+                new BotConsole('notice', event).log();
+                await fn(this.client, event);
+            } catch (e) {
+                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+            }
+        };
+        this.wrappers.set(fn, w);
+        (this.napcat as any).on('notice.group_admin', w);
     }
 
-    /** 群禁言变动（禁言/解除） */
+    offGroupAdmin(fn: Function): void {
+        const w = this.wrappers.get(fn);
+        if (w) {
+            (this.napcat as any).off('notice.group_admin', w);
+            this.wrappers.delete(fn);
+        }
+    }
+
     onGroupBan(fn: (bot: BotClient, event: GroupBanBan | GroupBanLiftBan) => any): void {
-        this.napcat.on('notice.group_ban', async (event: GroupBanBan | GroupBanLiftBan) => {
-            try { new BotConsole('notice', event).log(); await fn(this.client, event); }
-            catch (e) { new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log(); }
-        });
+        const w = async (event: GroupBanBan | GroupBanLiftBan) => {
+            try {
+                new BotConsole('notice', event).log();
+                await fn(this.client, event);
+            } catch (e) {
+                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+            }
+        };
+        this.wrappers.set(fn, w);
+        (this.napcat as any).on('notice.group_ban', w);
     }
 
-    /** 群名片变更 */
+    offGroupBan(fn: Function): void {
+        const w = this.wrappers.get(fn);
+        if (w) {
+            (this.napcat as any).off('notice.group_ban', w);
+            this.wrappers.delete(fn);
+        }
+    }
+
     onGroupCard(fn: (bot: BotClient, event: GroupCard) => any): void {
-        this.napcat.on('notice.group_card', async (event: GroupCard) => {
-            try { new BotConsole('notice', event).log(); await fn(this.client, event); }
-            catch (e) { new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log(); }
-        });
+        const w = async (event: GroupCard) => {
+            try {
+                new BotConsole('notice', event).log();
+                await fn(this.client, event);
+            } catch (e) {
+                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+            }
+        };
+        this.wrappers.set(fn, w);
+        (this.napcat as any).on('notice.group_card', w);
     }
 
-    /** 群成员减少（退群/被踢/bot被踢） */
+    offGroupCard(fn: Function): void {
+        const w = this.wrappers.get(fn);
+        if (w) {
+            (this.napcat as any).off('notice.group_card', w);
+            this.wrappers.delete(fn);
+        }
+    }
+
     onGroupDecrease(fn: (bot: BotClient, event: GroupDecreaseLeave | GroupDecreaseKick | GroupDecreaseKickMe) => any): void {
-        this.napcat.on('notice.group_decrease', async (event: GroupDecreaseLeave | GroupDecreaseKick | GroupDecreaseKickMe) => {
-            try { new BotConsole('notice', event).log(); await fn(this.client, event); }
-            catch (e) { new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log(); }
-        });
+        const w = async (event: GroupDecreaseLeave | GroupDecreaseKick | GroupDecreaseKickMe) => {
+            try {
+                new BotConsole('notice', event).log();
+                await fn(this.client, event);
+            } catch (e) {
+                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+            }
+        };
+        this.wrappers.set(fn, w);
+        (this.napcat as any).on('notice.group_decrease', w);
     }
 
-    /** 群成员增加（审批/邀请） */
+    offGroupDecrease(fn: Function): void {
+        const w = this.wrappers.get(fn);
+        if (w) {
+            (this.napcat as any).off('notice.group_decrease', w);
+            this.wrappers.delete(fn);
+        }
+    }
+
     onGroupIncrease(fn: (bot: BotClient, event: GroupIncreaseApprove | GroupIncreaseInvite) => any): void {
-        this.napcat.on('notice.group_increase', async (event: GroupIncreaseApprove | GroupIncreaseInvite) => {
-            try { new BotConsole('notice', event).log(); await fn(this.client, event); }
-            catch (e) { new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log(); }
-        });
+        const w = async (event: GroupIncreaseApprove | GroupIncreaseInvite) => {
+            try {
+                new BotConsole('notice', event).log();
+                await fn(this.client, event);
+            } catch (e) {
+                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+            }
+        };
+        this.wrappers.set(fn, w);
+        (this.napcat as any).on('notice.group_increase', w);
     }
 
-    /** 群消息撤回 */
+    offGroupIncrease(fn: Function): void {
+        const w = this.wrappers.get(fn);
+        if (w) {
+            (this.napcat as any).off('notice.group_increase', w);
+            this.wrappers.delete(fn);
+        }
+    }
+
     onGroupRecall(fn: (bot: BotClient, event: GroupRecall) => any): void {
-        this.napcat.on('notice.group_recall', async (event: GroupRecall) => {
-            try { new BotConsole('notice', event).log(); await fn(this.client, event); }
-            catch (e) { new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log(); }
-        });
+        const w = async (event: GroupRecall) => {
+            try {
+                new BotConsole('notice', event).log();
+                await fn(this.client, event);
+            } catch (e) {
+                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+            }
+        };
+        this.wrappers.set(fn, w);
+        (this.napcat as any).on('notice.group_recall', w);
     }
 
-    /** 群文件上传 */
+    offGroupRecall(fn: Function): void {
+        const w = this.wrappers.get(fn);
+        if (w) {
+            (this.napcat as any).off('notice.group_recall', w);
+            this.wrappers.delete(fn);
+        }
+    }
+
     onGroupUpload(fn: (bot: BotClient, event: GroupUpload) => any): void {
-        this.napcat.on('notice.group_upload', async (event: GroupUpload) => {
-            try { new BotConsole('notice', event).log(); await fn(this.client, event); }
-            catch (e) { new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log(); }
-        });
+        const w = async (event: GroupUpload) => {
+            try {
+                new BotConsole('notice', event).log();
+                await fn(this.client, event);
+            } catch (e) {
+                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+            }
+        };
+        this.wrappers.set(fn, w);
+        (this.napcat as any).on('notice.group_upload', w);
     }
 
-    /** 群表情回应 */
+    offGroupUpload(fn: Function): void {
+        const w = this.wrappers.get(fn);
+        if (w) {
+            (this.napcat as any).off('notice.group_upload', w);
+            this.wrappers.delete(fn);
+        }
+    }
+
     onGroupEmojiLike(fn: (bot: BotClient, event: GroupMsgEmojiLike) => any): void {
-        this.napcat.on('notice.group_msg_emoji_like', async (event: GroupMsgEmojiLike) => {
-            try { new BotConsole('notice', event).log(); await fn(this.client, event); }
-            catch (e) { new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log(); }
-        });
+        const w = async (event: GroupMsgEmojiLike) => {
+            try {
+                new BotConsole('notice', event).log();
+                await fn(this.client, event);
+            } catch (e) {
+                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+            }
+        };
+        this.wrappers.set(fn, w);
+        (this.napcat as any).on('notice.group_msg_emoji_like', w);
     }
 
-    /** 群设精（添加/删除） */
+    offGroupEmojiLike(fn: Function): void {
+        const w = this.wrappers.get(fn);
+        if (w) {
+            (this.napcat as any).off('notice.group_msg_emoji_like', w);
+            this.wrappers.delete(fn);
+        }
+    }
+
     onGroupEssence(fn: (bot: BotClient, event: GroupEssenceAdd | GroupEssenceDelete) => any): void {
-        this.napcat.on('notice.essence', async (event: GroupEssenceAdd | GroupEssenceDelete) => {
-            try { new BotConsole('notice', event).log(); await fn(this.client, event); }
-            catch (e) { new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log(); }
-        });
+        const w = async (event: GroupEssenceAdd | GroupEssenceDelete) => {
+            try {
+                new BotConsole('notice', event).log();
+                await fn(this.client, event);
+            } catch (e) {
+                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+            }
+        };
+        this.wrappers.set(fn, w);
+        (this.napcat as any).on('notice.essence', w);
     }
 
-    /** 戳一戳（好友/群） */
+    offGroupEssence(fn: Function): void {
+        const w = this.wrappers.get(fn);
+        if (w) {
+            (this.napcat as any).off('notice.essence', w);
+            this.wrappers.delete(fn);
+        }
+    }
+
     onPoke(fn: (bot: BotClient, event: NotifyPokeFriend | NotifyPokeGroup) => any): void {
-        this.napcat.on('notice.notify.poke', async (event: NotifyPokeFriend | NotifyPokeGroup) => {
-            try { new BotConsole('notice', event).log(); await fn(this.client, event); }
-            catch (e) { new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log(); }
-        });
+        const w = async (event: NotifyPokeFriend | NotifyPokeGroup) => {
+            try {
+                new BotConsole('notice', event).log();
+                await fn(this.client, event);
+            } catch (e) {
+                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+            }
+        };
+        this.wrappers.set(fn, w);
+        (this.napcat as any).on('notice.notify.poke', w);
     }
 
-    /** 群名称变更 */
+    offPoke(fn: Function): void {
+        const w = this.wrappers.get(fn);
+        if (w) {
+            (this.napcat as any).off('notice.notify.poke', w);
+            this.wrappers.delete(fn);
+        }
+    }
+
     onGroupNameChange(fn: (bot: BotClient, event: NotifyGroupName) => any): void {
-        this.napcat.on('notice.notify.group_name', async (event: NotifyGroupName) => {
-            try { new BotConsole('notice', event).log(); await fn(this.client, event); }
-            catch (e) { new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log(); }
-        });
+        const w = async (event: NotifyGroupName) => {
+            try {
+                new BotConsole('notice', event).log();
+                await fn(this.client, event);
+            } catch (e) {
+                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+            }
+        };
+        this.wrappers.set(fn, w);
+        (this.napcat as any).on('notice.notify.group_name', w);
     }
 
-    /** 群头衔变更 */
+    offGroupNameChange(fn: Function): void {
+        const w = this.wrappers.get(fn);
+        if (w) {
+            (this.napcat as any).off('notice.notify.group_name', w);
+            this.wrappers.delete(fn);
+        }
+    }
+
     onTitleChange(fn: (bot: BotClient, event: NotifyTitle) => any): void {
-        this.napcat.on('notice.notify.title', async (event: NotifyTitle) => {
-            try { new BotConsole('notice', event).log(); await fn(this.client, event); }
-            catch (e) { new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log(); }
-        });
+        const w = async (event: NotifyTitle) => {
+            try {
+                new BotConsole('notice', event).log();
+                await fn(this.client, event);
+            } catch (e) {
+                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+            }
+        };
+        this.wrappers.set(fn, w);
+        (this.napcat as any).on('notice.notify.title', w);
     }
 
-    /** 个人资料点赞 */
+    offTitleChange(fn: Function): void {
+        const w = this.wrappers.get(fn);
+        if (w) {
+            (this.napcat as any).off('notice.notify.title', w);
+            this.wrappers.delete(fn);
+        }
+    }
+
     onProfileLike(fn: (bot: BotClient, event: NotifyProfileLike) => any): void {
-        this.napcat.on('notice.notify.profile_like', async (event: NotifyProfileLike) => {
-            try { new BotConsole('notice', event).log(); await fn(this.client, event); }
-            catch (e) { new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log(); }
-        });
+        const w = async (event: NotifyProfileLike) => {
+            try {
+                new BotConsole('notice', event).log();
+                await fn(this.client, event);
+            } catch (e) {
+                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+            }
+        };
+        this.wrappers.set(fn, w);
+        (this.napcat as any).on('notice.notify.profile_like', w);
     }
 
-    /** bot 离线 */
+    offProfileLike(fn: Function): void {
+        const w = this.wrappers.get(fn);
+        if (w) {
+            (this.napcat as any).off('notice.notify.profile_like', w);
+            this.wrappers.delete(fn);
+        }
+    }
+
     onBotOffline(fn: (bot: BotClient, event: BotOffline) => any): void {
-        this.napcat.on('notice.bot_offline', async (event: BotOffline) => {
-            try { new BotConsole('notice', event).log(); await fn(this.client, event); }
-            catch (e) { new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log(); }
-        });
+        const w = async (event: BotOffline) => {
+            try {
+                new BotConsole('notice', event).log();
+                await fn(this.client, event);
+            } catch (e) {
+                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+            }
+        };
+        this.wrappers.set(fn, w);
+        (this.napcat as any).on('notice.bot_offline', w);
+    }
+
+    offBotOffline(fn: Function): void {
+        const w = this.wrappers.get(fn);
+        if (w) {
+            (this.napcat as any).off('notice.bot_offline', w);
+            this.wrappers.delete(fn);
+        }
     }
 }
 
-/**
- * 事件监听入口，按类别分组暴露监听器。
- *
- * @example
- * ```ts
- * bot.event.message.onGroupMessage(...);
- * bot.event.messageSent.onGroupSent(...);
- * bot.event.request.onFriend(...);
- * ```
- */
 export class BotEvent {
     public message: MessageEvent;
     public messageSent: MessageSent;
