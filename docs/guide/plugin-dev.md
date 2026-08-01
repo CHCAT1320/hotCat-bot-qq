@@ -184,6 +184,87 @@ export class SignPlugin extends PluginBase {
 `cron('0 0 * * *')` 基于 bot 所在机器的系统时钟。如果机器时间与 QQ 服务器时间偏差较大，签到可能失败。建议将 cron 设为 `'0 0 0 * * *'` 增加秒级延迟、或在 cron 回调中加一个随机延时（如 `setTimeout(fn, Math.random() * 30000)`），避免瞬时集中请求。
 :::
 
+## 插件管理
+
+Bot 启动时已自动 `scan` 并 `watch`，以下为手动控制场景。
+
+### 启动时自动加载所有插件（默认）
+
+无需任何代码，`bot.start()` 内部会执行 `scan('./plugins')` 和 `watch('./plugins')`。
+
+### 手动注册并加载
+
+```ts
+bot.plugin.register('hello', HelloPlugin, {
+    name: 'hello',
+    version: '1.0.0',
+})
+await bot.plugin.load('hello')
+```
+
+### 条件加载
+
+```ts
+const isDev = process.env.NODE_ENV !== 'production'
+
+if (isDev) {
+    bot.plugin.register('debug', DebugPlugin, { name: 'debug', version: '1.0.0' })
+    await bot.plugin.load('debug')
+}
+```
+
+### 获取插件实例调用自定义方法
+
+```ts
+const p = bot.plugin.get('sign') as SignPlugin
+if (p) {
+    p.doSign()
+}
+```
+
+### 重载所有已加载插件
+
+```ts
+for (const name of bot.plugin.loaded()) {
+    await bot.plugin.reload(name)
+}
+```
+
+### 卸载全部插件
+
+```ts
+for (const name of bot.plugin.loaded()) {
+    await bot.plugin.unload(name)
+}
+```
+
+### 通过消息指令控制插件
+
+```ts
+bot.event.message.onGroupMessage(async (bot, event) => {
+    if (event.raw_message === '/reload test') {
+        await bot.plugin.reload('test')
+        await bot.api.sendGroupMessage(event.group_id, Message.text('已重载'))
+    }
+
+    if (event.raw_message === '/plugins') {
+        const list = bot.plugin.list().join(', ')
+        await bot.api.sendGroupMessage(event.group_id, Message.text(`已注册: ${list}`))
+    }
+})
+```
+
+### 加载错误处理
+
+`scan` 和 `load` 失败只输出错误日志，不影响其他插件：
+
+```
+[system]: 插件 "sign" 已注册
+[system]: 插件 "sign" 已加载
+[error]: 加载插件 "broken" 失败: index.ts 未导出符合规范的类
+[system]: 插件 "hello" 已加载
+```
+
 ## 目录结构
 
 ```
