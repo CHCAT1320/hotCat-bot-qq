@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://hotcat-bot-qq.docs.chcat1320.top/sitemap.xml

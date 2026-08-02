@@ -4,6 +4,16 @@ export default defineConfig({
     title: 'HotCat Bot',
     description: '基于 napcat 的 QQ 机器人框架',
     base: '/',
+    sitemap: {
+        hostname: 'https://hotcat-bot-qq.docs.chcat1320.top',
+    },
+    head: [
+        ['meta', { name: 'robots', content: 'index, follow' }],
+        ['meta', { property: 'og:title', content: 'HotCat Bot' }],
+        ['meta', { property: 'og:description', content: '基于 napcat 的 QQ 机器人框架' }],
+        ['meta', { property: 'og:type', content: 'website' }],
+        ['meta', { property: 'og:url', content: 'https://hotcat-bot-qq.docs.chcat1320.top' }],
+    ],
     themeConfig: {
         search: {
             provider: 'local',
