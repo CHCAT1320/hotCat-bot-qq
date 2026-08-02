@@ -52,7 +52,8 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "prepublishOnly": "bun run build",
+    "build:plugin": "tsc --outDir plugins/hotCatPlugin --rootDir plugins/hotCatPlugin --module ESNext --target ES2020 --moduleResolution bundler --declaration --skipLibCheck plugins/hotCatPlugin/index.ts",
+    "prepublishOnly": "bun run build && bun run build:plugin",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs"
