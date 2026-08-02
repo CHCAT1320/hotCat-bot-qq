@@ -265,16 +265,88 @@ bot.event.message.onGroupMessage(async (bot, event) => {
 [system]: 插件 "hello" 已加载
 ```
 
+## TypeScript 编译为 JS
+
+框架支持 `.ts` 和 `.js` 插件。开发调试阶段直接跑 `.ts`，发布或分发时编译为 `.js`，原因：
+
+- **纯 Node.js 用户无法直接执行 `.ts`**，需要 JS 入口
+- **编译后启动更快**，省去运行时类型检查
+- **npm 包分发**时只有 `.js` 能直接被 `require` / `import`
+
+### Node.js 用户：tsc 编译
+
+```bash
+# 单独编译
+tsc --module ESNext --target ES2020 --declaration --outDir dist plugins/hello/index.ts
+```
+
+或项目级 `plugins/hello/tsconfig.json`：
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "outDir": ".",
+    "declaration": true,
+    "skipLibCheck": true
+  },
+  "include": ["index.ts"]
+}
+```
+
+```bash
+cd plugins/hello && tsc
+# 产物: index.js + index.d.ts（同目录），直接可被 scan 发现
+```
+
+### Bun 用户：bun build
+
+```bash
+bun build plugins/hello/index.ts --outdir plugins/hello --format esm
+```
+
+> `bun build` 会打包所有依赖，产物体积较大但运行更快，适合发布场景。开发调试直接用 `index.ts` 即可。
+
+### package.json 构建脚本
+
+```json
+{
+  "name": "hotcat-plugin-hello",
+  "scripts": {
+    "build": "tsc",
+    "build:bun": "bun build index.ts --outdir . --format esm"
+  },
+  "files": ["index.ts", "index.js", "index.d.ts"]
+}
+```
+
+:::tip 发布建议
+线上分发带 `.js`，`files` 中同时保留 `index.ts`，用户拿到包无论 Node 还是 Bun 都能直接用。
+:::
+
 ## 目录结构
 
+普通用户开发目录：
+
 ```
-plugins/
-├── hotCatPlugin/
-│   └── index.ts
-├── sign/
-│   └── index.ts
-└── utils/
-    └── helper.ts       # 不会被自动加载（无 index.ts）
+my-bot/
+├── bot.ts
+├── package.json
+├── node_modules/
+│   └── hotcat-bot-qq/
+└── plugins/
+    ├── hotCatPlugin/         # 默认插件，启动自动复制
+    │   └── index.ts
+    ├── hello/                # 自行开发的源码插件
+    │   └── index.ts
+    ├── sign/                 # npm 安装的已编译插件
+    │   ├── index.ts          # 源码（可选）
+    │   ├── index.js          # 编译产物（入口，被 scan 发现）
+    │   └── index.d.ts
+    └── utils/
+        └── helper.ts         # 不会被加载（无 index.ts / index.js）
 ```
 
-只加载包含 `index.ts` 的子目录。
+两文件同时存在时 `index.js` 优先，确保 Node.js 用户能正常加载。构建产物输出到同目录，不要用 `dist/` 子目录。

@@ -10,7 +10,7 @@ export type RequestGroup = RequestGroupAdd | RequestGroupInvite;
 /** notice 事件通用类型 */
 export type NoticeEvent = Record<string, any> & { post_type: 'notice'; notice_type: string; sub_type?: string };
 /** BotConsole 日志分类 */
-export type BotConsoleType = 'system' | 'groupMessage' | 'privateMessage' | 'error' | 'sendGroupMessage' | 'sendPrivateMessage' | 'groupMessageSelf' | 'privateMessageSelf' | 'requestFriend' | 'requestGroupAdd' | 'requestGroupInvite' | 'notice';
+export type BotConsoleType = 'system' | 'groupMessage' | 'privateMessage' | 'error' | 'sendGroupMessage' | 'sendPrivateMessage' | 'groupMessageSelf' | 'privateMessageSelf' | 'requestFriend' | 'requestGroupAdd' | 'requestGroupInvite' | 'notice' | 'plugin';
 
 /** ANSI 颜色/样式码 */
 export const colors = {
@@ -170,8 +170,8 @@ export const formatMessage = (m: Message): string => {
  */
 export class BotConsole {
     public type: BotConsoleType;
-    public content: string | GroupMessage | GroupMessageSelf | PrivateMessage | PrivateMessageSelf | Message[] | RequestFriend | RequestGroupAdd | RequestGroupInvite | NoticeEvent;
-    constructor(type: BotConsoleType, content: string | GroupMessage | GroupMessageSelf | PrivateMessage | PrivateMessageSelf | Message[] | RequestFriend | RequestGroupAdd | RequestGroupInvite | NoticeEvent) {
+    public content: string | GroupMessage | GroupMessageSelf | PrivateMessage | PrivateMessageSelf | Message[] | RequestFriend | RequestGroupAdd | RequestGroupInvite | NoticeEvent | { name: string; msg: string };
+    constructor(type: BotConsoleType, content: string | GroupMessage | GroupMessageSelf | PrivateMessage | PrivateMessageSelf | Message[] | RequestFriend | RequestGroupAdd | RequestGroupInvite | NoticeEvent | { name: string; msg: string }) {
         this.type = type;
         this.content = content;
     }
@@ -261,6 +261,9 @@ export class BotConsole {
                 ('name_new' in event ? `${colors.green}${sanitize(event.name_new)}${colors.reset}` : '') +
                 ('file' in event ? `文件:${(event as any).file.name}` : '')
             );
+        } else if (this.type === 'plugin') {
+            const { name, msg } = this.content as { name: string; msg: string };
+            console.log(`${colors.magenta}[plugin:${name}]:${colors.reset} ${msg}`);
         }
     }
 }

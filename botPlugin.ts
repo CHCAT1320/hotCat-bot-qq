@@ -46,7 +46,7 @@ export class BotPluginSystem {
             throw new Error(`插件 "${name}" 已注册`)
         }
         this.registry.set(name, { ctor, meta })
-        new BotConsole('system', `插件 "${meta.name}" 已注册`).log()
+        new BotConsole('plugin', { name: meta.name, msg: '已注册' }).log()
     }
 
     /**
@@ -64,7 +64,7 @@ export class BotPluginSystem {
         const instance = record.ctor.create(this.api, this.client, record.meta)
         await instance.load()
         this.instances.set(name, instance)
-        new BotConsole('system', `插件 "${record.meta.name}" 已加载`).log()
+        new BotConsole('plugin', { name: record.meta.name, msg: '已加载' }).log()
     }
 
     /**
@@ -78,7 +78,7 @@ export class BotPluginSystem {
         }
         await instance.unload()
         this.instances.delete(name)
-        new BotConsole('system', `插件 "${name}" 已卸载`).log()
+        new BotConsole('plugin', { name: this.registry.get(name)?.meta.name || name, msg: '已卸载' }).log()
     }
 
     /**
@@ -105,6 +105,14 @@ export class BotPluginSystem {
         return Array.from(this.instances.keys())
     }
 
+    private findIndex(dir: string, name: string): string | null {
+        const js = path.join(dir, name, 'index.js')
+        if (fs.existsSync(js)) return js
+        const ts = path.join(dir, name, 'index.ts')
+        if (fs.existsSync(ts)) return ts
+        return null
+    }
+
     /**
      * 扫描目录，自动注册并加载所有插件
      * @param dir - 插件目录路径
@@ -119,8 +127,8 @@ export class BotPluginSystem {
         for (const entry of entries) {
             if (!entry.isDirectory()) continue
             const name = entry.name
-            const indexPath = path.join(dir, name, 'index.ts')
-            if (!fs.existsSync(indexPath)) continue
+            const indexPath = this.findIndex(dir, name)
+            if (!indexPath) continue
 
             try {
                 const mod = await import(path.resolve(indexPath))
@@ -161,7 +169,7 @@ export class BotPluginSystem {
             return
         }
         this.watched = new Set(this.list())
-        new BotConsole('system', `开始监听插件目录: ${this.watchDir}`).log()
+        new BotConsole('plugin', { name: 'watch', msg: `开始监听 ${this.watchDir}` }).log()
 
         this.watcher = setInterval(async () => {
             if (!fs.existsSync(this.watchDir!)) return
@@ -171,8 +179,8 @@ export class BotPluginSystem {
             for (const entry of entries) {
                 if (!entry.isDirectory()) continue
                 const name = entry.name
-                const indexPath = path.join(this.watchDir!, name, 'index.ts')
-                if (!fs.existsSync(indexPath)) continue
+                const indexPath = this.findIndex(this.watchDir!, name)
+                if (!indexPath) continue
                 current.add(name)
 
                 if (!this.watched.has(name)) {
@@ -182,12 +190,13 @@ export class BotPluginSystem {
 
             for (const name of Array.from(this.watched)) {
                 if (!current.has(name) && this.registry.has(name)) {
+                    const displayName = this.registry.get(name)?.meta.name || name
                     try {
                         if (this.instances.has(name)) {
                             await this.unload(name)
                         }
                         this.registry.delete(name)
-                        new BotConsole('system', `插件 "${name}" 目录已删除，已移除`).log()
+                        new BotConsole('plugin', { name: displayName, msg: '目录已删除，已移除' }).log()
                     } catch {}
                 }
             }
@@ -202,12 +211,13 @@ export class BotPluginSystem {
             clearInterval(this.watcher)
             this.watcher = null
             this.watchDir = null
-            new BotConsole('system', '已停止插件目录监听').log()
+            new BotConsole('plugin', { name: 'watch', msg: '已停止' }).log()
         }
     }
 
     private async scanOne(dir: string, name: string): Promise<void> {
-        const indexPath = path.join(dir, name, 'index.ts')
+        const indexPath = this.findIndex(dir, name)
+        if (!indexPath) return
         try {
             const mod = await import(indexPath)
             const ctor = mod[name.charAt(0).toUpperCase() + name.slice(1) + 'Plugin'] || mod.default || Object.values(mod).find((v: any) => typeof v === 'function' && v.create)
@@ -218,7 +228,7 @@ export class BotPluginSystem {
             }
             this.register(name, ctor as PluginConstructor, meta)
             await this.load(name)
-            new BotConsole('system', `检测到新插件 "${name}"，已自动加载`).log()
+            new BotConsole('plugin', { name: meta.name, msg: '已自动加载' }).log()
         } catch (e: any) {
             new BotConsole('error', `自动加载插件 "${name}" 失败: ${e.message || e}`).log()
         }

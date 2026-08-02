@@ -77,7 +77,7 @@ async scan(dir: string, autoLoad?: boolean): Promise<string[]>
 扫描目录下所有插件并加载。`autoLoad` 默认 `true`。
 
 - 遍历 `dir` 下所有子目录
-- 检查 `index.ts` 是否存在
+- 检查 `index.ts` 或 `index.js`（两文件同时存在时 `.js` 优先，确保 Node.js 兼容）
 - 动态 `import()` 并自动识别导出的插件类
 - 返回成功加载的插件名列表
 
