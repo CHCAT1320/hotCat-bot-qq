@@ -885,6 +885,6 @@ export class BotApi {
 
     /** 对事件执行快速操作（隐藏 API） */
     async handleQuickOperation(context: any, operation: any) {
-        await (this.napcat as any)['.handle_quick_operation']({ context, operation });
+        await this.napcat['.handle_quick_operation']({ context, operation });
     }
 }

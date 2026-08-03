@@ -18,6 +18,7 @@ dist/
 # 非框架文件
 scripts
 indexOld.ts
+.kilo
 
 # vitepress
 docs/.vitepress/dist/

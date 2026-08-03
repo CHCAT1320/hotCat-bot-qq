@@ -13,25 +13,32 @@ const config = {
 
 export const bot = new BotClient(config);
 await bot.start();
-
-bot.event.message.onGroupMessage(async (bot, event) => {
-    if (event.group_id !== 912458345) return;
-    await bot.api.sendGroupMessage(event.group_id,
-        Message.reply(event.message_id),
-        Message.at(event.user_id),
-        Message.text(' 收到消息: '),
-        ...event.message.map(seg => Message.from(seg))
-    );
-});
 bot.event.message.onPrivateMessage(async (bot, event) => {
-    if (event.user_id !== 1095216448) return;
     await bot.api.sendPrivateMessage(event.user_id,
         Message.text('Hello, World!'),
     );
 });
 bot.event.notice.onPoke(async (bot, event) => {
-    if (event.user_id !== 1095216448) return;
-    await bot.api.sendPrivateMessage(event.user_id,
-        Message.text('收到poke消息'),
+    await bot.api.sendGroupMessage(event.user_id,
+        Message.text('哎呀戳我干啥嘛，讨厌！'),
+    );
+});
+bot.event.notice.onGroupIncrease(async (bot, event) => {
+    await bot.api.sendGroupMessage(event.group_id,
+        Message.text(`欢迎新人！`),
+    );
+});
+bot.event.message.onGroupMessage(async (bot, event) => {
+    for (const message of event.message) {
+        if (message.type === 'text') {
+            if (message.data.text === '回应续标识') {
+                await bot.api.setMsgEmojiLike(event.message_id, '424');
+            }
+        }
+    }
+})
+bot.event.notice.onGroupEmojiLike(async (bot, event) => {
+    await bot.api.sendGroupMessage(event.group_id,
+        Message.text(`收到id为${event.likes[0].emoji_id}的emoji表情！`),
     );
 });

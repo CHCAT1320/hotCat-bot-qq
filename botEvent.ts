@@ -1,5 +1,5 @@
 import { GroupMessage, GroupMessageSelf, PrivateFriendMessageSelf, PrivateGroupMessageSelf, NCWebsocket, RequestFriend, RequestGroupAdd, RequestGroupInvite, FriendAdd, FriendRecall, GroupAdminSet, GroupAdminUnset, GroupBanBan, GroupBanLiftBan, GroupCard, GroupDecreaseLeave, GroupDecreaseKick, GroupDecreaseKickMe, GroupIncreaseApprove, GroupIncreaseInvite, GroupRecall, GroupUpload, GroupMsgEmojiLike, GroupEssenceAdd, GroupEssenceDelete, BotOffline, NotifyPokeFriend, NotifyPokeGroup, NotifyGroupName, NotifyTitle, NotifyProfileLike } from 'node-napcat-ts';
-import { BotConsole, PrivateMessage, PrivateMessageSelf, RequestGroup } from './botConsole';
+import { BotConsole, PrivateMessage, PrivateMessageSelf, RequestGroup, NoticeEvent as NoticeEventType } from './botConsole';
 import type { BotClient } from './botClient';
 import type { BotApi } from './botApi';
 
@@ -14,25 +14,30 @@ export class MessageEvent {
     constructor(napcat: NCWebsocket, client: BotClient) {
         this.napcat = napcat;
         this.client = client;
+        this.napcat.on('message.group', (event: GroupMessage) => {
+            new BotConsole('groupMessage', event).log();
+        });
+        this.napcat.on('message.private', (event: PrivateMessage) => {
+            new BotConsole('privateMessage', event).log();
+        });
     }
 
     onGroupMessage(fn: (bot: BotClient, event: GroupMessage) => any): void {
         const w = async (event: GroupMessage) => {
             try {
-                new BotConsole('groupMessage', event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
         };
         this.wrappers.set(fn, w);
-        (this.napcat as any).on('message.group', w);
+        this.napcat.on('message.group', w);
     }
 
     offGroupMessage(fn: Function): void {
         const w = this.wrappers.get(fn);
         if (w) {
-            (this.napcat as any).off('message.group', w);
+            this.napcat.off('message.group', w);
             this.wrappers.delete(fn);
         }
     }
@@ -40,20 +45,19 @@ export class MessageEvent {
     onGroupNormal(fn: (bot: BotClient, event: GroupMessage) => any): void {
         const w = async (event: GroupMessage) => {
             try {
-                new BotConsole('groupMessage', event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
         };
         this.wrappers.set(fn, w);
-        (this.napcat as any).on('message.group.normal', w);
+        this.napcat.on('message.group.normal', w);
     }
 
     offGroupNormal(fn: Function): void {
         const w = this.wrappers.get(fn);
         if (w) {
-            (this.napcat as any).off('message.group.normal', w);
+            this.napcat.off('message.group.normal', w);
             this.wrappers.delete(fn);
         }
     }
@@ -61,20 +65,19 @@ export class MessageEvent {
     onPrivateMessage(fn: (bot: BotClient, event: PrivateMessage) => any): void {
         const w = async (event: PrivateMessage) => {
             try {
-                new BotConsole('privateMessage', event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
         };
         this.wrappers.set(fn, w);
-        (this.napcat as any).on('message.private', w);
+        this.napcat.on('message.private', w);
     }
 
     offPrivateMessage(fn: Function): void {
         const w = this.wrappers.get(fn);
         if (w) {
-            (this.napcat as any).off('message.private', w);
+            this.napcat.off('message.private', w);
             this.wrappers.delete(fn);
         }
     }
@@ -82,20 +85,19 @@ export class MessageEvent {
     onPrivateFriend(fn: (bot: BotClient, event: PrivateMessage) => any): void {
         const w = async (event: PrivateMessage) => {
             try {
-                new BotConsole('privateMessage', event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
         };
         this.wrappers.set(fn, w);
-        (this.napcat as any).on('message.private.friend', w);
+        this.napcat.on('message.private.friend', w);
     }
 
     offPrivateFriend(fn: Function): void {
         const w = this.wrappers.get(fn);
         if (w) {
-            (this.napcat as any).off('message.private.friend', w);
+            this.napcat.off('message.private.friend', w);
             this.wrappers.delete(fn);
         }
     }
@@ -103,20 +105,19 @@ export class MessageEvent {
     onPrivateGroup(fn: (bot: BotClient, event: PrivateMessage) => any): void {
         const w = async (event: PrivateMessage) => {
             try {
-                new BotConsole('privateMessage', event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
         };
         this.wrappers.set(fn, w);
-        (this.napcat as any).on('message.private.group', w);
+        this.napcat.on('message.private.group', w);
     }
 
     offPrivateGroup(fn: Function): void {
         const w = this.wrappers.get(fn);
         if (w) {
-            (this.napcat as any).off('message.private.group', w);
+            this.napcat.off('message.private.group', w);
             this.wrappers.delete(fn);
         }
     }
@@ -133,25 +134,30 @@ export class MessageSent {
     constructor(napcat: NCWebsocket, client: BotClient) {
         this.napcat = napcat;
         this.client = client;
+        this.napcat.on('message_sent.group', (event: GroupMessageSelf) => {
+            new BotConsole('groupMessageSelf', event).log();
+        });
+        this.napcat.on('message_sent.private', (event: PrivateMessageSelf) => {
+            new BotConsole('privateMessageSelf', event).log();
+        });
     }
 
     onGroupSent(fn: (bot: BotClient, event: GroupMessageSelf) => any): void {
         const w = async (event: GroupMessageSelf) => {
             try {
-                new BotConsole('groupMessageSelf', event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
         };
         this.wrappers.set(fn, w);
-        (this.napcat as any).on('message_sent.group', w);
+        this.napcat.on('message_sent.group', w);
     }
 
     offGroupSent(fn: Function): void {
         const w = this.wrappers.get(fn);
         if (w) {
-            (this.napcat as any).off('message_sent.group', w);
+            this.napcat.off('message_sent.group', w);
             this.wrappers.delete(fn);
         }
     }
@@ -159,20 +165,19 @@ export class MessageSent {
     onGroupNormal(fn: (bot: BotClient, event: GroupMessageSelf) => any): void {
         const w = async (event: GroupMessageSelf) => {
             try {
-                new BotConsole('groupMessageSelf', event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
         };
         this.wrappers.set(fn, w);
-        (this.napcat as any).on('message_sent.group.normal', w);
+        this.napcat.on('message_sent.group.normal', w);
     }
 
     offGroupNormal(fn: Function): void {
         const w = this.wrappers.get(fn);
         if (w) {
-            (this.napcat as any).off('message_sent.group.normal', w);
+            this.napcat.off('message_sent.group.normal', w);
             this.wrappers.delete(fn);
         }
     }
@@ -180,20 +185,19 @@ export class MessageSent {
     onPrivateSent(fn: (bot: BotClient, event: PrivateMessageSelf) => any): void {
         const w = async (event: PrivateMessageSelf) => {
             try {
-                new BotConsole('privateMessageSelf', event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
         };
         this.wrappers.set(fn, w);
-        (this.napcat as any).on('message_sent.private', w);
+        this.napcat.on('message_sent.private', w);
     }
 
     offPrivateSent(fn: Function): void {
         const w = this.wrappers.get(fn);
         if (w) {
-            (this.napcat as any).off('message_sent.private', w);
+            this.napcat.off('message_sent.private', w);
             this.wrappers.delete(fn);
         }
     }
@@ -201,20 +205,19 @@ export class MessageSent {
     onPrivateFriend(fn: (bot: BotClient, event: PrivateFriendMessageSelf) => any): void {
         const w = async (event: PrivateFriendMessageSelf) => {
             try {
-                new BotConsole('privateMessageSelf', event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
         };
         this.wrappers.set(fn, w);
-        (this.napcat as any).on('message_sent.private.friend', w);
+        this.napcat.on('message_sent.private.friend', w);
     }
 
     offPrivateFriend(fn: Function): void {
         const w = this.wrappers.get(fn);
         if (w) {
-            (this.napcat as any).off('message_sent.private.friend', w);
+            this.napcat.off('message_sent.private.friend', w);
             this.wrappers.delete(fn);
         }
     }
@@ -222,20 +225,19 @@ export class MessageSent {
     onPrivateGroup(fn: (bot: BotClient, event: PrivateGroupMessageSelf) => any): void {
         const w = async (event: PrivateGroupMessageSelf) => {
             try {
-                new BotConsole('privateMessageSelf', event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
         };
         this.wrappers.set(fn, w);
-        (this.napcat as any).on('message_sent.private.group', w);
+        this.napcat.on('message_sent.private.group', w);
     }
 
     offPrivateGroup(fn: Function): void {
         const w = this.wrappers.get(fn);
         if (w) {
-            (this.napcat as any).off('message_sent.private.group', w);
+            this.napcat.off('message_sent.private.group', w);
             this.wrappers.delete(fn);
         }
     }
@@ -252,25 +254,33 @@ export class RequestEvent {
     constructor(napcat: NCWebsocket, client: BotClient) {
         this.napcat = napcat;
         this.client = client;
+        this.napcat.on('request.friend', (event: RequestFriend) => {
+            new BotConsole('requestFriend', event).log();
+        });
+        this.napcat.on('request.group.add', (event: RequestGroupAdd) => {
+            new BotConsole('requestGroupAdd', event).log();
+        });
+        this.napcat.on('request.group.invite', (event: RequestGroupInvite) => {
+            new BotConsole('requestGroupInvite', event).log();
+        });
     }
 
     onFriend(fn: (bot: BotClient, event: RequestFriend) => any): void {
         const w = async (event: RequestFriend) => {
             try {
-                new BotConsole('requestFriend', event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
         };
         this.wrappers.set(fn, w);
-        (this.napcat as any).on('request.friend', w);
+        this.napcat.on('request.friend', w);
     }
 
     offFriend(fn: Function): void {
         const w = this.wrappers.get(fn);
         if (w) {
-            (this.napcat as any).off('request.friend', w);
+            this.napcat.off('request.friend', w);
             this.wrappers.delete(fn);
         }
     }
@@ -278,20 +288,19 @@ export class RequestEvent {
     onGroupAdd(fn: (bot: BotClient, event: RequestGroupAdd) => any): void {
         const w = async (event: RequestGroupAdd) => {
             try {
-                new BotConsole('requestGroupAdd', event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
         };
         this.wrappers.set(fn, w);
-        (this.napcat as any).on('request.group.add', w);
+        this.napcat.on('request.group.add', w);
     }
 
     offGroupAdd(fn: Function): void {
         const w = this.wrappers.get(fn);
         if (w) {
-            (this.napcat as any).off('request.group.add', w);
+            this.napcat.off('request.group.add', w);
             this.wrappers.delete(fn);
         }
     }
@@ -299,20 +308,19 @@ export class RequestEvent {
     onGroupInvite(fn: (bot: BotClient, event: RequestGroupInvite) => any): void {
         const w = async (event: RequestGroupInvite) => {
             try {
-                new BotConsole('requestGroupInvite', event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
         };
         this.wrappers.set(fn, w);
-        (this.napcat as any).on('request.group.invite', w);
+        this.napcat.on('request.group.invite', w);
     }
 
     offGroupInvite(fn: Function): void {
         const w = this.wrappers.get(fn);
         if (w) {
-            (this.napcat as any).off('request.group.invite', w);
+            this.napcat.off('request.group.invite', w);
             this.wrappers.delete(fn);
         }
     }
@@ -320,21 +328,19 @@ export class RequestEvent {
     onGroupRequest(fn: (bot: BotClient, event: RequestGroup) => any): void {
         const w = async (event: RequestGroup) => {
             try {
-                const type = event.sub_type === 'add' ? 'requestGroupAdd' : 'requestGroupInvite';
-                new BotConsole(type, event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
         };
         this.wrappers.set(fn, w);
-        (this.napcat as any).on('request.group', w);
+        this.napcat.on('request.group', w);
     }
 
     offGroupRequest(fn: Function): void {
         const w = this.wrappers.get(fn);
         if (w) {
-            (this.napcat as any).off('request.group', w);
+            this.napcat.off('request.group', w);
             this.wrappers.delete(fn);
         }
     }
@@ -351,25 +357,43 @@ export class NoticeEvent {
     constructor(napcat: NCWebsocket, client: BotClient) {
         this.napcat = napcat;
         this.client = client;
+        const log = (event: NoticeEventType) => {
+            new BotConsole('notice', event).log();
+        };
+        this.napcat.on('notice.friend_add', log);
+        this.napcat.on('notice.friend_recall', log);
+        this.napcat.on('notice.group_admin', log);
+        this.napcat.on('notice.group_ban', log);
+        this.napcat.on('notice.group_card', log);
+        this.napcat.on('notice.group_decrease', log);
+        this.napcat.on('notice.group_increase', log);
+        this.napcat.on('notice.group_recall', log);
+        this.napcat.on('notice.group_upload', log);
+        this.napcat.on('notice.group_msg_emoji_like', log);
+        this.napcat.on('notice.essence', log);
+        this.napcat.on('notice.notify.poke', log);
+        this.napcat.on('notice.notify.group_name', log);
+        this.napcat.on('notice.notify.title', log);
+        this.napcat.on('notice.notify.profile_like', log);
+        this.napcat.on('notice.bot_offline', log);
     }
 
     onFriendAdd(fn: (bot: BotClient, event: FriendAdd) => any): void {
         const w = async (event: FriendAdd) => {
             try {
-                new BotConsole('notice', event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
         };
         this.wrappers.set(fn, w);
-        (this.napcat as any).on('notice.friend_add', w);
+        this.napcat.on('notice.friend_add', w);
     }
 
     offFriendAdd(fn: Function): void {
         const w = this.wrappers.get(fn);
         if (w) {
-            (this.napcat as any).off('notice.friend_add', w);
+            this.napcat.off('notice.friend_add', w);
             this.wrappers.delete(fn);
         }
     }
@@ -377,20 +401,19 @@ export class NoticeEvent {
     onFriendRecall(fn: (bot: BotClient, event: FriendRecall) => any): void {
         const w = async (event: FriendRecall) => {
             try {
-                new BotConsole('notice', event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
         };
         this.wrappers.set(fn, w);
-        (this.napcat as any).on('notice.friend_recall', w);
+        this.napcat.on('notice.friend_recall', w);
     }
 
     offFriendRecall(fn: Function): void {
         const w = this.wrappers.get(fn);
         if (w) {
-            (this.napcat as any).off('notice.friend_recall', w);
+            this.napcat.off('notice.friend_recall', w);
             this.wrappers.delete(fn);
         }
     }
@@ -398,20 +421,19 @@ export class NoticeEvent {
     onGroupAdmin(fn: (bot: BotClient, event: GroupAdminSet | GroupAdminUnset) => any): void {
         const w = async (event: GroupAdminSet | GroupAdminUnset) => {
             try {
-                new BotConsole('notice', event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
         };
         this.wrappers.set(fn, w);
-        (this.napcat as any).on('notice.group_admin', w);
+        this.napcat.on('notice.group_admin', w);
     }
 
     offGroupAdmin(fn: Function): void {
         const w = this.wrappers.get(fn);
         if (w) {
-            (this.napcat as any).off('notice.group_admin', w);
+            this.napcat.off('notice.group_admin', w);
             this.wrappers.delete(fn);
         }
     }
@@ -419,20 +441,19 @@ export class NoticeEvent {
     onGroupBan(fn: (bot: BotClient, event: GroupBanBan | GroupBanLiftBan) => any): void {
         const w = async (event: GroupBanBan | GroupBanLiftBan) => {
             try {
-                new BotConsole('notice', event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
         };
         this.wrappers.set(fn, w);
-        (this.napcat as any).on('notice.group_ban', w);
+        this.napcat.on('notice.group_ban', w);
     }
 
     offGroupBan(fn: Function): void {
         const w = this.wrappers.get(fn);
         if (w) {
-            (this.napcat as any).off('notice.group_ban', w);
+            this.napcat.off('notice.group_ban', w);
             this.wrappers.delete(fn);
         }
     }
@@ -440,20 +461,19 @@ export class NoticeEvent {
     onGroupCard(fn: (bot: BotClient, event: GroupCard) => any): void {
         const w = async (event: GroupCard) => {
             try {
-                new BotConsole('notice', event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
         };
         this.wrappers.set(fn, w);
-        (this.napcat as any).on('notice.group_card', w);
+        this.napcat.on('notice.group_card', w);
     }
 
     offGroupCard(fn: Function): void {
         const w = this.wrappers.get(fn);
         if (w) {
-            (this.napcat as any).off('notice.group_card', w);
+            this.napcat.off('notice.group_card', w);
             this.wrappers.delete(fn);
         }
     }
@@ -461,20 +481,19 @@ export class NoticeEvent {
     onGroupDecrease(fn: (bot: BotClient, event: GroupDecreaseLeave | GroupDecreaseKick | GroupDecreaseKickMe) => any): void {
         const w = async (event: GroupDecreaseLeave | GroupDecreaseKick | GroupDecreaseKickMe) => {
             try {
-                new BotConsole('notice', event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
         };
         this.wrappers.set(fn, w);
-        (this.napcat as any).on('notice.group_decrease', w);
+        this.napcat.on('notice.group_decrease', w);
     }
 
     offGroupDecrease(fn: Function): void {
         const w = this.wrappers.get(fn);
         if (w) {
-            (this.napcat as any).off('notice.group_decrease', w);
+            this.napcat.off('notice.group_decrease', w);
             this.wrappers.delete(fn);
         }
     }
@@ -482,20 +501,19 @@ export class NoticeEvent {
     onGroupIncrease(fn: (bot: BotClient, event: GroupIncreaseApprove | GroupIncreaseInvite) => any): void {
         const w = async (event: GroupIncreaseApprove | GroupIncreaseInvite) => {
             try {
-                new BotConsole('notice', event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
         };
         this.wrappers.set(fn, w);
-        (this.napcat as any).on('notice.group_increase', w);
+        this.napcat.on('notice.group_increase', w);
     }
 
     offGroupIncrease(fn: Function): void {
         const w = this.wrappers.get(fn);
         if (w) {
-            (this.napcat as any).off('notice.group_increase', w);
+            this.napcat.off('notice.group_increase', w);
             this.wrappers.delete(fn);
         }
     }
@@ -503,20 +521,19 @@ export class NoticeEvent {
     onGroupRecall(fn: (bot: BotClient, event: GroupRecall) => any): void {
         const w = async (event: GroupRecall) => {
             try {
-                new BotConsole('notice', event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
         };
         this.wrappers.set(fn, w);
-        (this.napcat as any).on('notice.group_recall', w);
+        this.napcat.on('notice.group_recall', w);
     }
 
     offGroupRecall(fn: Function): void {
         const w = this.wrappers.get(fn);
         if (w) {
-            (this.napcat as any).off('notice.group_recall', w);
+            this.napcat.off('notice.group_recall', w);
             this.wrappers.delete(fn);
         }
     }
@@ -524,20 +541,19 @@ export class NoticeEvent {
     onGroupUpload(fn: (bot: BotClient, event: GroupUpload) => any): void {
         const w = async (event: GroupUpload) => {
             try {
-                new BotConsole('notice', event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
         };
         this.wrappers.set(fn, w);
-        (this.napcat as any).on('notice.group_upload', w);
+        this.napcat.on('notice.group_upload', w);
     }
 
     offGroupUpload(fn: Function): void {
         const w = this.wrappers.get(fn);
         if (w) {
-            (this.napcat as any).off('notice.group_upload', w);
+            this.napcat.off('notice.group_upload', w);
             this.wrappers.delete(fn);
         }
     }
@@ -545,20 +561,19 @@ export class NoticeEvent {
     onGroupEmojiLike(fn: (bot: BotClient, event: GroupMsgEmojiLike) => any): void {
         const w = async (event: GroupMsgEmojiLike) => {
             try {
-                new BotConsole('notice', event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
         };
         this.wrappers.set(fn, w);
-        (this.napcat as any).on('notice.group_msg_emoji_like', w);
+        this.napcat.on('notice.group_msg_emoji_like', w);
     }
 
     offGroupEmojiLike(fn: Function): void {
         const w = this.wrappers.get(fn);
         if (w) {
-            (this.napcat as any).off('notice.group_msg_emoji_like', w);
+            this.napcat.off('notice.group_msg_emoji_like', w);
             this.wrappers.delete(fn);
         }
     }
@@ -566,20 +581,19 @@ export class NoticeEvent {
     onGroupEssence(fn: (bot: BotClient, event: GroupEssenceAdd | GroupEssenceDelete) => any): void {
         const w = async (event: GroupEssenceAdd | GroupEssenceDelete) => {
             try {
-                new BotConsole('notice', event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
         };
         this.wrappers.set(fn, w);
-        (this.napcat as any).on('notice.essence', w);
+        this.napcat.on('notice.essence', w);
     }
 
     offGroupEssence(fn: Function): void {
         const w = this.wrappers.get(fn);
         if (w) {
-            (this.napcat as any).off('notice.essence', w);
+            this.napcat.off('notice.essence', w);
             this.wrappers.delete(fn);
         }
     }
@@ -587,20 +601,19 @@ export class NoticeEvent {
     onPoke(fn: (bot: BotClient, event: NotifyPokeFriend | NotifyPokeGroup) => any): void {
         const w = async (event: NotifyPokeFriend | NotifyPokeGroup) => {
             try {
-                new BotConsole('notice', event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
         };
         this.wrappers.set(fn, w);
-        (this.napcat as any).on('notice.notify.poke', w);
+        this.napcat.on('notice.notify.poke', w);
     }
 
     offPoke(fn: Function): void {
         const w = this.wrappers.get(fn);
         if (w) {
-            (this.napcat as any).off('notice.notify.poke', w);
+            this.napcat.off('notice.notify.poke', w);
             this.wrappers.delete(fn);
         }
     }
@@ -608,20 +621,19 @@ export class NoticeEvent {
     onGroupNameChange(fn: (bot: BotClient, event: NotifyGroupName) => any): void {
         const w = async (event: NotifyGroupName) => {
             try {
-                new BotConsole('notice', event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
         };
         this.wrappers.set(fn, w);
-        (this.napcat as any).on('notice.notify.group_name', w);
+        this.napcat.on('notice.notify.group_name', w);
     }
 
     offGroupNameChange(fn: Function): void {
         const w = this.wrappers.get(fn);
         if (w) {
-            (this.napcat as any).off('notice.notify.group_name', w);
+            this.napcat.off('notice.notify.group_name', w);
             this.wrappers.delete(fn);
         }
     }
@@ -629,20 +641,19 @@ export class NoticeEvent {
     onTitleChange(fn: (bot: BotClient, event: NotifyTitle) => any): void {
         const w = async (event: NotifyTitle) => {
             try {
-                new BotConsole('notice', event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
         };
         this.wrappers.set(fn, w);
-        (this.napcat as any).on('notice.notify.title', w);
+        this.napcat.on('notice.notify.title', w);
     }
 
     offTitleChange(fn: Function): void {
         const w = this.wrappers.get(fn);
         if (w) {
-            (this.napcat as any).off('notice.notify.title', w);
+            this.napcat.off('notice.notify.title', w);
             this.wrappers.delete(fn);
         }
     }
@@ -650,20 +661,19 @@ export class NoticeEvent {
     onProfileLike(fn: (bot: BotClient, event: NotifyProfileLike) => any): void {
         const w = async (event: NotifyProfileLike) => {
             try {
-                new BotConsole('notice', event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
         };
         this.wrappers.set(fn, w);
-        (this.napcat as any).on('notice.notify.profile_like', w);
+        this.napcat.on('notice.notify.profile_like', w);
     }
 
     offProfileLike(fn: Function): void {
         const w = this.wrappers.get(fn);
         if (w) {
-            (this.napcat as any).off('notice.notify.profile_like', w);
+            this.napcat.off('notice.notify.profile_like', w);
             this.wrappers.delete(fn);
         }
     }
@@ -671,20 +681,19 @@ export class NoticeEvent {
     onBotOffline(fn: (bot: BotClient, event: BotOffline) => any): void {
         const w = async (event: BotOffline) => {
             try {
-                new BotConsole('notice', event).log();
                 await fn(this.client, event);
             } catch (e) {
                 new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
             }
         };
         this.wrappers.set(fn, w);
-        (this.napcat as any).on('notice.bot_offline', w);
+        this.napcat.on('notice.bot_offline', w);
     }
 
     offBotOffline(fn: Function): void {
         const w = this.wrappers.get(fn);
         if (w) {
-            (this.napcat as any).off('notice.bot_offline', w);
+            this.napcat.off('notice.bot_offline', w);
             this.wrappers.delete(fn);
         }
     }
