@@ -19,9 +19,12 @@ bot.event.message.onPrivateMessage(async (bot, event) => {
     );
 });
 bot.event.notice.onPoke(async (bot, event) => {
-    await bot.api.sendGroupMessage(event.user_id,
-        Message.text('哎呀戳我干啥嘛，讨厌！'),
-    );
+    if ('group_id' in event) {
+        await bot.api.sendGroupMessage(event.group_id,
+            Message.text('哎呀戳我干啥嘛，讨厌！'),
+            Message.at(event.user_id)
+        );
+    }
 });
 bot.event.notice.onGroupIncrease(async (bot, event) => {
     await bot.api.sendGroupMessage(event.group_id,
