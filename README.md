@@ -48,6 +48,7 @@ bot.event.message.onGroupMessage(async (bot, event) => {
 
 完整文档 → [框架开发文档](https://hotcat-bot-qq.docs.chcat1320.top)
 
+交流群638144340
 ## 协议
 
 MIT © CHCAT1320
