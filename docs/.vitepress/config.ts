@@ -46,6 +46,7 @@ export default defineConfig({
                 items: [
                     { text: '快速开始', link: '/guide/getting-started' },
                     { text: '插件开发', link: '/guide/plugin-dev' },
+                    { text: 'CQ 码与 JSON 互转', link: '/guide/cq-json' },
                 ],
             },
             {
