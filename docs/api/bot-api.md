@@ -1,3 +1,8 @@
+---
+title: BotApi 完整方法参考
+description: HotCat Bot 的 BotApi 完整方法参考：统一封装 NapCat / OneBot 全部 API，覆盖消息发送与管理、群管理、群公告、群信息查询、精华消息、用户与好友、群互动、文件与资源、收藏、AI、系统等分类的调用方式与参数说明。
+---
+
 # BotApi
 
 所有 napcat API 的统一封装，通过 `bot.api.xxx()` 调用。

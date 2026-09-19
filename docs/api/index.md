@@ -1,3 +1,8 @@
+---
+title: API 总览 - 核心类与快速索引
+description: HotCat Bot API 总览：介绍 BotClient、BotApi、BotEvent、BotScheduler、BotPluginSystem 与 Message 的访问方式和整体架构，并汇总 NapCat 方法分类、事件分类和定时任务接口的快速索引，方便按功能查找接口。
+---
+
 # API 总览
 
 HotCat Bot 所有公共 API 按类组织：

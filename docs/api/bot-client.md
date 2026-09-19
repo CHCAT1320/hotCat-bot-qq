@@ -1,3 +1,8 @@
+---
+title: BotClient 客户端 API - 连接与启动
+description: HotCat Bot 的 BotClient 类参考：构造函数与 BotConfig 配置项（baseUrl、accessToken、自动重连、apiTimeout），api / event / scheduler / nickname / id 属性，以及 start() 启动方法。
+---
+
 # BotClient
 
 Bot 客户端，封装 WebSocket 连接、启动流程及 bot 自身信息。

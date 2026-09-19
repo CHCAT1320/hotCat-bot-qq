@@ -1,3 +1,8 @@
+---
+title: BotScheduler 定时任务 API
+description: HotCat Bot 的 BotScheduler 定时任务调度器参考：通过 bot.scheduler 使用 cron 表达式、every 固定间隔、at 指定时刻三种模式创建任务，并提供 cancel 与 cancelAll 取消接口，附常用 cron 表达式示例。
+---
+
 # BotScheduler
 
 定时任务调度器，通过 `bot.scheduler` 访问。支持 cron 表达式、间隔时间、指定时间三种模式。

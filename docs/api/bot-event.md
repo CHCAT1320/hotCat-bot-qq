@@ -1,3 +1,8 @@
+---
+title: BotEvent 事件监听 API
+description: HotCat Bot 的 BotEvent 事件系统参考：通过 bot.event 按类别监听事件，涵盖 message 接收消息、messageSent 发送回执、request 加好友 / 加群请求、notice 通知事件，提供 on / off 系列方法及事件字段说明。
+---
+
 # BotEvent
 
 事件监听入口，通过 `bot.event` 访问，按类别分组。

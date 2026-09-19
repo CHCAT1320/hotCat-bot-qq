@@ -1,18 +1,56 @@
 import { defineConfig } from 'vitepress'
 
+const hostname = 'https://hotcat-bot-qq.docs.chcat1320.top'
+
 export default defineConfig({
+    lang: 'zh-CN',
     title: 'HotCat Bot',
-    description: '基于 napcat 的 QQ 机器人框架',
+    description:
+        'HotCat Bot 是基于 node-napcat-ts 的 TypeScript QQ 机器人框架，封装 NapCat / OneBot 全部 API，内置类型安全的消息段、事件系统、cron 定时任务与热插拔插件系统，帮助开发者快速搭建稳定、易扩展的 QQ 群聊与私聊机器人。',
     base: '/',
     sitemap: {
-        hostname: 'https://hotcat-bot-qq.docs.chcat1320.top',
+        hostname,
+    },
+    transformPageData(pageData) {
+        const path = pageData.relativePath
+            .replace(/index\.md$/, '')
+            .replace(/\.md$/, '.html')
+        pageData.frontmatter.head ??= []
+        pageData.frontmatter.head.push([
+            'link',
+            { rel: 'canonical', href: `${hostname}/${path}` },
+        ])
     },
     head: [
         ['meta', { name: 'robots', content: 'index, follow' }],
-        ['meta', { property: 'og:title', content: 'HotCat Bot' }],
-        ['meta', { property: 'og:description', content: '基于 napcat 的 QQ 机器人框架' }],
+        ['meta', { name: 'author', content: 'CHCAT1320' }],
+        ['meta', { name: 'keywords', content: 'QQ机器人, NapCat, OneBot, TypeScript, node-napcat-ts, 机器人框架, 插件系统' }],
+        ['meta', { property: 'og:site_name', content: 'HotCat Bot' }],
+        ['meta', { property: 'og:title', content: 'HotCat Bot - 基于 NapCat 的 TypeScript QQ 机器人框架' }],
+        [
+            'meta',
+            {
+                property: 'og:description',
+                content:
+                    '基于 node-napcat-ts 的 TypeScript QQ 机器人框架，封装 NapCat / OneBot 全部 API，内置消息段、事件系统、定时任务与热插拔插件系统。',
+            },
+        ],
         ['meta', { property: 'og:type', content: 'website' }],
-        ['meta', { property: 'og:url', content: 'https://hotcat-bot-qq.docs.chcat1320.top' }],
+        ['meta', { property: 'og:url', content: hostname }],
+        ['meta', { property: 'og:locale', content: 'zh_CN' }],
+        ['meta', { property: 'og:image', content: `${hostname}/logo.png` }],
+        ['meta', { property: 'og:image:alt', content: 'HotCat Bot' }],
+        ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
+        ['meta', { name: 'twitter:title', content: 'HotCat Bot - 基于 NapCat 的 TypeScript QQ 机器人框架' }],
+        [
+            'meta',
+            {
+                name: 'twitter:description',
+                content:
+                    '基于 node-napcat-ts 的 TypeScript QQ 机器人框架，封装 NapCat / OneBot 全部 API，内置消息段、事件系统、定时任务与热插拔插件系统。',
+            },
+        ],
+        ['meta', { name: 'twitter:image', content: `${hostname}/logo.png` }],
     ],
     themeConfig: {
         search: {

@@ -1,3 +1,8 @@
+---
+title: Message 消息段构建器 API
+description: HotCat Bot 的 Message 消息段构建器参考：提供 text、at、atAll、reply、face、image、file、video、record、json、dice、rps 等构造方法，支持 toCQ() 与 toJson() 转换，说明各类消息段的收发支持情况。
+---
+
 # Message
 
 消息段构建器，用于构造发送内容。搭配 `bot.api.sendMessage()` / `bot.api.sendGroupMessage()` 等方法使用。

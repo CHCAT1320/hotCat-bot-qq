@@ -1,3 +1,8 @@
+---
+title: 插件开发指南 - PluginBase 生命周期与热重载
+description: HotCat Bot 插件开发完整指南：继承 PluginBase 编写插件，掌握 static meta、create、load / unload 生命周期，正确清理事件监听与定时器，理解热重载规范、导入路径、插件管理 API，以及用 tsc 或 bun build 编译 TypeScript 插件。
+---
+
 # 插件开发
 
 HotCat Bot 启动时自动扫描 `plugins/` 目录并加载所有插件，同时监听目录变化实现热插拔。

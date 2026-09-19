@@ -1,3 +1,8 @@
+---
+title: 快速开始 - 安装、配置与基础用法
+description: HotCat Bot 快速开始教程：介绍环境要求，使用 npm / pnpm / bun 安装，配置 BotClient 连接 NapCat WebSocket 并启动机器人，包含监听群消息与私聊、发送与撤回消息、禁言、处理加好友 / 加群请求、cron 定时任务和关键词回复等常用示例。
+---
+
 # 快速开始
 
 ## 环境要求

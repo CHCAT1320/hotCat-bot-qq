@@ -1,3 +1,8 @@
+---
+title: BotPluginSystem 插件管理 API
+description: HotCat Bot 的 BotPluginSystem 插件管理器参考：通过 bot.plugin 完成插件注册、加载、卸载、热重载与目录扫描监听，包含 register、load、unload、reload、list、loaded、scan、watch 等方法说明。
+---
+
 # BotPluginSystem
 
 插件管理器，通过 `bot.plugin` 访问。负责插件的注册、加载、卸载、热重载和目录监听。

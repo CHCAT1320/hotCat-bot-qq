@@ -1,5 +1,8 @@
 ---
 layout: home
+title: HotCat Bot - 基于 NapCat 的 TypeScript QQ 机器人框架
+titleTemplate: false
+description: HotCat Bot 是基于 node-napcat-ts 的 TypeScript QQ 机器人框架，封装 NapCat / OneBot 全部 API，内置类型安全的消息段、事件系统、cron 定时任务与热插拔插件系统。文档包含快速开始、插件开发指南与完整 API 参考。
 
 hero:
   name: HotCat Bot

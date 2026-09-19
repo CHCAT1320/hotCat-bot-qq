@@ -1,3 +1,8 @@
+---
+title: CQ 码与 JSON 消息段互转
+description: HotCat Bot 消息格式转换教程：使用 Message.from()、toCQ()、toJson() 在 OneBot / NapCat 的 JSON 消息段与 CQ 码字符串之间互转，包含 CQ 码解析实现、转义规则，以及在事件处理、消息回显与发送场景中的实际用法。
+---
+
 # CQ 码与 JSON 互转
 
 HotCat Bot 的消息既可以用 OneBot/NapCat 的 JSON 消息段表示，也可以用 CQ 码字符串表示。框架通过 `Message` 统一构造和转换消息，适合在事件处理、消息回显和兼容旧接口时使用。
