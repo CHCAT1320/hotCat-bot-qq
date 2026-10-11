@@ -1,6 +1,6 @@
 {
   "name": "hotcat-bot-qq",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "基于 node-napcat-ts 的 TypeScript QQ 机器人框架",
   "type": "module",
   "main": "dist/index.js",
@@ -51,7 +51,7 @@
     "logo.png"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "build": "tsc -p tsconfig.build.json && node scripts/fix-dist-extensions.mjs",
     "build:plugin": "tsc --outDir plugins/hotCatPlugin --rootDir plugins/hotCatPlugin --module ESNext --target ES2020 --moduleResolution bundler --declaration --skipLibCheck plugins/hotCatPlugin/index.ts",
     "prepublishOnly": "bun run build && bun run build:plugin",
     "docs:dev": "vitepress dev docs",

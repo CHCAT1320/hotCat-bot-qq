@@ -4,6 +4,7 @@ import { PluginBase, PluginConstructor, PluginMeta } from './plugin'
 import { BotConsole } from './botConsole'
 import * as fs from 'fs'
 import * as path from 'path'
+import { pathToFileURL } from 'url'
 
 interface PluginRecord {
     ctor: PluginConstructor
@@ -131,7 +132,9 @@ export class BotPluginSystem {
             if (!indexPath) continue
 
             try {
-                const mod = await import(path.resolve(indexPath))
+                // Node 的 ESM 加载器不接受裸 Windows 绝对路径（ERR_UNSUPPORTED_ESM_URL_SCHEME），
+                // 必须转成 file:// URL；Bun 两者都接受。
+                const mod = await import(pathToFileURL(path.resolve(indexPath)).href)
                 const ctor = mod[name.charAt(0).toUpperCase() + name.slice(1) + 'Plugin'] || mod.default || Object.values(mod).find((v: any) => typeof v === 'function' && v.create)
                 if (!ctor || typeof ctor.create !== 'function') {
                     new BotConsole('error', `插件目录 "${name}" 未导出符合规范的插件类`).log()
@@ -219,7 +222,7 @@ export class BotPluginSystem {
         const indexPath = this.findIndex(dir, name)
         if (!indexPath) return
         try {
-            const mod = await import(indexPath)
+            const mod = await import(pathToFileURL(path.resolve(indexPath)).href)
             const ctor = mod[name.charAt(0).toUpperCase() + name.slice(1) + 'Plugin'] || mod.default || Object.values(mod).find((v: any) => typeof v === 'function' && v.create)
             if (!ctor || typeof ctor.create !== 'function') return
             const meta: PluginMeta = ctor.meta || {

@@ -50,7 +50,7 @@ export class HotCatPlugin extends PluginBase {
 }
 HotCatPlugin.meta = {
     name: 'hotCatPlugin',
-    version: '0.1.9',
+    version: '0.1.10',
     description: 'HotCat 默认插件（#hotCat 指令查询 bot 状态）',
     author: 'CHCAT1320',
 };
