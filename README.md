@@ -25,6 +25,7 @@ import { Message } from './message'
 const bot = new BotClient({
     baseUrl: 'ws://localhost:8082/onebot/v11/ws/',
     accessToken: 'your-access-token',
+    owner: 123456789, // 必填：bot 主人（管理员）QQ 号
 })
 await bot.start()
 

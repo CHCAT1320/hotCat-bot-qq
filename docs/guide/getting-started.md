@@ -37,6 +37,7 @@ import { BotClient, Message } from 'hotcat-bot-qq'
 const bot = new BotClient({
     baseUrl: 'ws://localhost:8082/onebot/v11/ws/',
     accessToken: 'your-access-token',
+    owner: 123456789,
     reconnection: {
         enable: true,
         attempts: 10,
@@ -45,6 +46,28 @@ const bot = new BotClient({
 })
 await bot.start()
 ```
+
+`baseUrl` 同样为必填项，且必须以 `ws://` 或 `wss://` 开头；未填写或格式错误时，`new BotClient()` 会直接抛出错误。
+
+### 配置主人 QQ
+
+`owner` 为 **必填项**，填写 bot 主人（管理员）的 QQ 号（数字）：
+
+```ts
+const bot = new BotClient({
+    baseUrl: 'ws://localhost:8082/onebot/v11/ws/',
+    accessToken: 'your-access-token',
+    owner: 123456789, // 必填：bot 主人 QQ 号
+})
+```
+
+未配置 `owner` 或填写了非法 QQ 号时，`new BotClient()` 会直接抛出错误，bot 不会启动：
+
+```
+Error: 未配置 bot 主人 QQ 号：请在 BotClient 配置中填写 owner 字段，例如 owner: 123456789，未配置前无法启动
+```
+
+配置成功后可通过 `bot.owner` 读取主人（管理员）QQ 号，或使用 `bot.isOwner(qq)` 判断某个 QQ 号是否为主人。
 
 ## 启动
 
@@ -70,6 +93,17 @@ bun bot.ts
 - [处理加好友请求](#处理加好友请求)
 - [处理加群邀请](#处理加群邀请)
 - [常用模式](#常用模式)
+
+::: tip 简化写法
+`bot.event.message`、`bot.event.notice` 等是固定实例，可以用 `const` 提前保存，例如：
+
+```ts
+const { message, notice } = bot.event
+
+message.onGroupMessage(async (bot, event) => { /* ... */ })
+notice.onPoke(async (bot, event) => { /* ... */ })
+```
+:::
 
 ### 监听群消息
 

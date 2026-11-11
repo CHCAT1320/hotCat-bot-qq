@@ -17,6 +17,27 @@ bot.event
 └── notice: NoticeEvent         ← 通知事件
 ```
 
+## 简化写法
+
+`bot.event.message`、`bot.event.notice` 等都是启动时创建好的固定实例，可以用 `const` 提前保存引用，避免重复书写长路径：
+
+```ts
+const { message, notice, request } = bot.event
+
+message.onGroupMessage(async (bot, event) => { /* ... */ })
+message.onPrivateMessage(async (bot, event) => { /* ... */ })
+notice.onPoke(async (bot, event) => { /* ... */ })
+```
+
+也可以只保存其中一类：
+
+```ts
+const msg = bot.event.message
+msg.onGroupMessage(handler)
+```
+
+引用始终指向同一个事件实例，`onXxx` / `offXxx` 注册与移除监听在该写法下同样有效。
+
 ---
 
 ## MessageEvent

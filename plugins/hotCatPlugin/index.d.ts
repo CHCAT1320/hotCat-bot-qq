@@ -12,6 +12,9 @@ export declare class HotCatPlugin extends PluginBase {
     static create(api: BotApi, bot: BotClient): HotCatPlugin;
     load(): Promise<void>;
     unload(): Promise<void>;
+    private isInfoCommand;
+    private buildInfo;
     private onGroupMsg;
+    private onPrivateMsg;
     private formatUptime;
 }

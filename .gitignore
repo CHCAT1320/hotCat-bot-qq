@@ -19,7 +19,9 @@ dist/
 scripts
 # 构建流程依赖的脚本必须入库，否则他人 clone 后 `bun run build` 会失败
 !scripts/
+scripts/*
 !scripts/fix-dist-extensions.mjs
+copyright/
 indexOld.ts
 .kilo
 

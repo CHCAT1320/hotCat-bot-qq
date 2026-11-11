@@ -4,6 +4,7 @@ import { Message } from './message'
 const config = {
     baseUrl: 'ws://localhost:8082/onebot/v11/ws/',
     accessToken: 'chcat13201145',
+    owner: 1095216448, // 管理员（主人）QQ 号
     reconnection: {
         enable: true,
         attempts: 10,

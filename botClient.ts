@@ -11,6 +11,8 @@ import { fileURLToPath } from 'url';
 export interface BotConfig {
     baseUrl: string;
     accessToken?: string;
+    /** Bot 主人（管理员）QQ 号，必填，未配置将拒绝启动 */
+    owner: number;
     reconnection?: {
         enable?: boolean;
         attempts?: number;
@@ -26,6 +28,7 @@ export interface BotConfig {
  * const bot = new BotClient({
  *     baseUrl: 'ws://localhost:8082/onebot/v11/ws/',
  *     accessToken: 'yourAccessToken',
+ *     owner: 123456789,
  * })
  * await bot.start()
  */
@@ -36,14 +39,36 @@ export class BotClient {
     public plugin!: import('./botPlugin').BotPluginSystem;
     public nickname: string | null;
     public id: number | null;
+    /** Bot 主人（管理员）QQ 号，来自配置项 `owner` */
+    public owner: number;
 
     constructor(config: BotConfig) {
-        this.api = new BotApi(config as NCWebsocketOptions);
+        const owner = Number(config?.owner);
+        if (!Number.isInteger(owner) || owner <= 0) {
+            throw new Error('未配置 bot 主人 QQ 号：请在 BotClient 配置中填写 owner 字段，例如 owner: 123456789，未配置前无法启动');
+        }
+        const baseUrl = typeof config?.baseUrl === 'string' ? config.baseUrl.trim() : '';
+        if (!baseUrl) {
+            throw new Error('未配置 NapCat WebSocket 地址：请在 BotClient 配置中填写 baseUrl 字段，例如 baseUrl: "ws://localhost:8082/onebot/v11/ws/"，未配置前无法启动');
+        }
+        if (!/^wss?:\/\/\S+$/i.test(baseUrl)) {
+            throw new Error('baseUrl 格式错误：必须以 ws:// 或 wss:// 开头，例如 ws://localhost:8082/onebot/v11/ws/');
+        }
+        this.owner = owner;
+        this.api = new BotApi({ ...config, baseUrl } as NCWebsocketOptions);
         this.api.client = this;
         this.event = new BotEvent(this.api, this);
         this.scheduler = new BotScheduler();
         this.nickname = null;
         this.id = null;
+    }
+
+    /**
+     * 判断指定 QQ 号是否为 bot 主人
+     * @param qq - 待判断的 QQ 号
+     */
+    isOwner(qq: number | string): boolean {
+        return Number(qq) === this.owner;
     }
 
     /**
