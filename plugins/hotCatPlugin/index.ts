@@ -7,7 +7,7 @@ import * as os from 'os'
 export class HotCatPlugin extends PluginBase {
     static meta = {
         name: 'hotCatPlugin',
-        version: '0.1.10',
+        version: '0.1.11',
         description: 'HotCat 默认插件（群聊/私聊 #hotCat 指令查询 bot 状态）',
         author: 'CHCAT1320',
     }
