@@ -47,7 +47,7 @@ const bot = new BotClient({
 await bot.start()
 ```
 
-`baseUrl` 同样为必填项，且必须以 `ws://` 或 `wss://` 开头；未填写或格式错误时，`new BotClient()` 会直接抛出错误。
+`baseUrl` 也是必填项，且必须以 `ws://` 或 `wss://` 开头；未填写或格式错误时，`new BotClient()` 会直接抛出错误。
 
 ### 配置主人 QQ
 
@@ -75,18 +75,23 @@ Error: 未配置 bot 主人 QQ 号：请在 BotClient 配置中填写 owner 字�
 bun bot.ts
 ```
 
-启动成功后控制台输出：
+启动成功后控制台输出类似：
 
 ```
-[hotCatBotSystem]:  napcat服务器连接成功
+[hotCatBotSystem]:  正在连接 napcat...（第 1 次）
+[hotCatBotSystem]:  napcat WebSocket 已连接
+[hotCatBotSystem]:  bot QQ 已上线
 [hotCatBotSystem]:  bot启动成功，昵称: MyBot, 用户ID: 123456789
 ```
+
+运行期间可通过 `bot.online` 判断 bot QQ 是否在线；掉线和恢复时会自动输出提醒。
 
 ## 基础用法
 
 - [监听群消息](#监听群消息)
 - [监听私聊消息](#监听私聊消息)
 - [发送消息](#发送消息)
+- [日志输出](#日志输出)
 - [撤回消息](#撤回消息)
 - [禁言](#禁言)
 - [定时任务](#定时任务)
@@ -147,6 +152,20 @@ await bot.api.sendMessage({ user_id: 111222333 },
     Message.text('你好')
 )
 ```
+
+直接调用时若 bot 离线会抛出错误，建议 `try/catch` 或先判断 `bot.online`。
+
+### 日志输出
+
+```ts
+import { BotConsole } from 'hotcat-bot-qq'
+
+new BotConsole('system', '自定义日志').log()
+new BotConsole('error', '处理失败').log()
+new BotConsole('plugin', { name: 'myPlugin', msg: '已加载' }).log()
+```
+
+详见 [BotConsole](/api/bot-console)。
 
 ### 撤回消息
 

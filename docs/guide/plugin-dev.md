@@ -70,6 +70,17 @@ export class HelloPlugin extends PluginBase {
 | `this.bot` | `BotClient` | bot 实例，包含 event/scheduler/plugin |
 | `this.meta` | `PluginMeta` | 插件元数据 `{ name, version, description? }` |
 
+通过 `this.bot.online` 可判断 bot QQ 是否在线，`this.bot.owner` 是配置的管理员 QQ 号，`this.bot.isOwner(qq)` 可直接判断某个 QQ 号是否为管理员。
+
+日志建议使用框架的 `BotConsole`，保持统一格式：
+
+```ts
+import { BotConsole } from 'hotcat-bot-qq'
+
+new BotConsole('plugin', { name: this.meta.name, msg: '插件已加载' }).log()
+new BotConsole('error', '处理消息失败').log()
+```
+
 ### PluginMeta
 
 ```ts

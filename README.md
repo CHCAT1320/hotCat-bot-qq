@@ -19,8 +19,7 @@ bun add hotcat-bot-qq
 ## 快速开始
 
 ```ts
-import { BotClient } from './botClient'
-import { Message } from './message'
+import { BotClient, Message } from 'hotcat-bot-qq'
 
 const bot = new BotClient({
     baseUrl: 'ws://localhost:8082/onebot/v11/ws/',
@@ -44,12 +43,14 @@ bot.event.message.onGroupMessage(async (bot, event) => {
 - **事件系统** — `BotEvent` 按类别分组暴露 message/messageSent/request/notice 事件
 - **定时任务** — `BotScheduler` 支持 cron 表达式、固定间隔、指定时间
 - **插件系统** — 继承 `PluginBase` 即可开发插件，支持热重载、目录监听自动加载，`scan` + `watch` 零配置接入
+- **连接状态** — 自动重连 NapCat，检测 bot QQ 掉线并通过 `bot.online` 提供状态
+- **日志工具** — `BotConsole` 统一控制台输出，支持消息段、JSON 和异常格式化
 
 ## 文档
 
 完整文档 → [框架开发文档](https://hotcat-bot-qq.docs.chcat1320.top)
 
-交流群638144340
+交流群：638144340
 ## 协议
 
 MIT © CHCAT1320

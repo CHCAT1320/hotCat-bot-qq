@@ -31,7 +31,9 @@ BotClient
  ├── scheduler: BotScheduler → bot.scheduler.cron(...)
  ├── plugin: BotPluginSystem → bot.plugin.register(...)
  ├── nickname: string     (bot 昵称)
- └── id: number           (bot QQ 号)
+ ├── id: number           (bot QQ 号)
+ ├── owner: number        (bot 主人 / 管理员 QQ 号)
+ └── online: boolean      (bot QQ 是否在线)
 ```
 
 ## 快速索引
@@ -40,19 +42,20 @@ BotClient
 
 | 分类 | 方法数 | 常用方法 |
 |---|---|---|
-| 消息发送 | 10 | `sendMessage`, `sendGroupMessage`, `sendPrivateMessage`, `sendForwardMsg` |
+| 连接 | 1 | `connect` |
+| 消息发送 | 8 | `sendMessage`, `sendGroupMessage`, `sendPrivateMessage`, `sendForwardMsg` |
 | 消息管理 | 12 | `deleteMessage`, `getMessage`, `markMsgAsRead`, `translateEn2zh` |
 | 群管理 | 12 | `banMember`, `kickMember`, `setGroupAdmin`, `setGroupCard` |
 | 群公告 | 3 | `sendGroupNotice`, `getGroupNotice`, `deleteGroupNotice` |
 | 群信息 | 10 | `getGroupInfo`, `getGroupMemberList`, `getGroupHonorInfo` |
 | 精华消息 | 3 | `getEssenceMsgList`, `setEssenceMsg`, `deleteEssenceMsg` |
-| 用户/好友 | 8 | `getFriendList`, `getStrangerInfo`, `deleteFriend` |
-| 群互动 | 5 | `groupPoke`, `friendPoke`, `sendLike`, `sendPoke` |
+| 用户/好友 | 9 | `getFriendList`, `getStrangerInfo`, `getRecentContact`, `deleteFriend` |
+| 群互动 | 5 | `groupPoke`, `friendPoke`, `sendLike`, `getProfileLike` |
 | 文件/资源 | 9 | `getImage`, `getRecord`, `uploadGroupFile`, `ocrImage` |
 | 群文件 | 6 | `getGroupRootFiles`, `createGroupFileFolder` |
 | 收藏 | 2 | `createCollection`, `getCollectionList` |
 | AI | 3 | `getAiCharacters`, `sendGroupAiRecord` |
-| 系统 | 13 | `getStatus`, `getCookies`, `setQQProfile` |
+| 系统 | 16 | `getStatus`, `getCookies`, `setQQProfile` |
 | 推荐 | 2 | `recommendContact`, `recommendGroup` |
 | 小程序 | 1 | `getMiniAppArk` |
 
@@ -60,8 +63,8 @@ BotClient
 
 | 分类 | 属性 | 事件数 |
 |---|---|---|
-| 接收消息 | `bot.event.message` | 6 |
-| 发送回执 | `bot.event.messageSent` | 6 |
+| 接收消息 | `bot.event.message` | 5 |
+| 发送回执 | `bot.event.messageSent` | 5 |
 | 请求 | `bot.event.request` | 4 |
 | 通知 | `bot.event.notice` | 16 |
 

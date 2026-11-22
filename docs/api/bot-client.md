@@ -1,6 +1,6 @@
 ---
 title: BotClient 客户端 API - 连接与启动
-description: HotCat Bot 的 BotClient 类参考：构造函数与 BotConfig 配置项（baseUrl、accessToken、自动重连、apiTimeout），api / event / scheduler / nickname / id 属性，以及 start() 启动方法。
+description: HotCat Bot 的 BotClient 类参考：构造函数与 BotConfig 配置项（baseUrl、accessToken、owner、自动重连、apiTimeout），api / event / scheduler / plugin / nickname / id / owner / online 属性，以及 start()、isOwner() 方法。
 ---
 
 # BotClient
@@ -32,6 +32,7 @@ new BotClient(config: BotConfig)
 | `api` | `BotApi` | API 调用入口 |
 | `event` | `BotEvent` | 事件监听入口 |
 | `scheduler` | `BotScheduler` | 定时任务入口 |
+| `plugin` | `BotPluginSystem` | 插件系统入口 |
 | `nickname` | `string \| null` | 登录后 bot 昵称，启动前为 null |
 | `id` | `number \| null` | 登录后 bot QQ 号，启动前为 null |
 | `owner` | `number` | 配置的 Bot 主人（管理员）QQ 号 |
@@ -70,7 +71,7 @@ const bot = new BotClient({
     owner: 123456789,
     reconnection: {
         enable: true,
-        attempts: 10,
+        attempts: Infinity,
         delay: 5000,
     },
 })

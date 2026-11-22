@@ -5,15 +5,23 @@ description: HotCat Bot 的 BotApi 完整方法参考：统一封装 NapCat / On
 
 # BotApi
 
-所有 napcat API 的统一封装，通过 `bot.api.xxx()` 调用。
+所有 napcat API 的统一封装，通过 `bot.api.xxx()` 调用。需要未封装接口时，可通过 `bot.api.napcat` 访问底层 `NCWebsocket` 实例。
 
 ::: tip ID 类型约定
 QQ 号、群号、消息号、表情 ID、公告 ID 等数值型 ID 统一使用 `number`。文件 ID、文件夹 ID、音乐 ID、AI 角色 ID 是平台提供的不透明字符串，保持 `string`。
 :::
 
+## 连接
+
+### connect()
+```ts
+async connect(): Promise<void>
+```
+建立底层 NapCat WebSocket 连接。通常由 `bot.start()` 自动调用；手动调用不会初始化事件、插件和登录信息，一般不需要直接使用。
+
 ## 消息发送
 
-所有 API 调用都会在发起前检查 `bot.online`；bot 离线（QQ 掉线或 WebSocket 未连接）时直接抛出 `bot 当前离线（QQ 掉线或连接未建立），API 调用未执行`，不会实际请求 NapCat。事件监听与定时任务中的异常会被框架捕获并输出到控制台；在普通代码中直接调用时，请自行 `try/catch`。`getLoginInfo()` 在登录前也可调用。
+所有 API 调用都会在发起前检查 `bot.online`；bot 离线（QQ 掉线或 WebSocket 未连接）时不会实际请求 NapCat：发送方法抛出 `bot 当前离线（QQ 掉线或连接未建立），消息未发送`，其他方法抛出 `bot 当前离线（QQ 掉线或连接未建立），API 调用未执行`。事件监听与定时任务中的异常会被框架捕获并输出到控制台；在普通代码中直接调用时，请自行 `try/catch`。`getLoginInfo()` 在登录前也可调用。
 
 ### sendMessage(target, ...messages)
 ```ts
@@ -372,6 +380,12 @@ async setSelfLongnick(longnick: string): Promise<void>
 ```
 设置个人签名/长昵称。
 
+### getRecentContact()
+```ts
+async getRecentContact(): Promise<object>
+```
+获取最近的会话列表。
+
 ## 群互动
 
 ### groupPoke(groupId, userId)
@@ -397,6 +411,12 @@ async sendPoke(userId: number, groupId?: number): Promise<void>
 async sendLike(userId: number, times?: number): Promise<void>
 ```
 给好友点赞，`times` 默认 1 次。
+
+### getProfileLike()
+```ts
+async getProfileLike(): Promise<object>
+```
+获取自身资料卡的点赞列表。
 
 ## 文件 / 资源
 

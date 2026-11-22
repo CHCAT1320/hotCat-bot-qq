@@ -5,7 +5,7 @@ description: HotCat Bot 的 BotConsole 控制台日志工具，支持 system、e
 
 # BotConsole
 
-控制台日志输出工具，包根直接导出，可在插件、入口文件或其他模块中使用。
+控制台日志输出工具，包根直接导出，可在插件、入口文件或其他模块中使用。也可通过 `hotcat-bot-qq/botConsole` 子路径导入。
 
 ```ts
 import { BotConsole } from 'hotcat-bot-qq'
@@ -28,6 +28,8 @@ new BotConsole(type: BotConsoleType, content: ...)
 
 `groupMessage`、`privateMessage`、`notice` 等类型供框架内部格式化事件使用，需要传入对应事件对象，外部一般使用 `system` / `error` / `plugin`。
 
+完整 `BotConsoleType`：`system`、`groupMessage`、`privateMessage`、`error`、`sendGroupMessage`、`sendPrivateMessage`、`groupMessageSelf`、`privateMessageSelf`、`requestFriend`、`requestGroupAdd`、`requestGroupInvite`、`notice`、`plugin`。
+
 ## log()
 
 ```ts
@@ -39,7 +41,7 @@ new BotConsole('plugin', { name: 'myPlugin', msg: '已加载' }).log()
 ## 辅助导出
 
 ```ts
-import { colors, parseCQ, formatMessage, formatError } from 'hotcat-bot-qq'
+import { BotConsole, Message, colors, parseCQ, formatMessage, formatError } from 'hotcat-bot-qq'
 
 colors.green      // ANSI 颜色码
 parseCQ('[CQ:at,qq=123]')        // '[@123]'

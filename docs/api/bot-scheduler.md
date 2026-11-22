@@ -17,7 +17,7 @@ description: HotCat Bot 的 BotScheduler 定时任务调度器参考：通过 bo
 cron(expr: string, fn: () => void | Promise<void>): number
 ```
 
-标准 cron 表达式定时，返回 job id 可用于取消。
+标准 cron 表达式定时，返回 job id 可用于取消。无效表达式不会创建任务，并输出错误日志。
 
 | 表达式 | 含义 |
 |---|---|
@@ -76,7 +76,7 @@ bot.scheduler.every(60000, () => { ... })
 at(time: string | Date, fn: () => void | Promise<void>): number
 ```
 
-指定时间执行。`'08:00'` 格式为每日重复，`'YYYY-MM-DD HH:mm'` 或 `Date` 为一次性。
+指定时间执行。`'08:00'` 格式为每日重复，`'YYYY-MM-DD HH:mm'` 或 `Date` 为一次性。无效日期不会创建任务，并输出错误日志；远期日期使用 `node-schedule` 调度，不受 `setTimeout` 上限影响。
 
 ```ts
 // 每天 8:00

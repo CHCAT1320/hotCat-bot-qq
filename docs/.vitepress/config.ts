@@ -102,6 +102,7 @@ export default defineConfig({
                         link: '/api/bot-api',
                         collapsed: false,
                         items: [
+                            { text: '连接', link: '/api/bot-api#连接' },
                             { text: '消息发送', link: '/api/bot-api#消息发送' },
                             { text: '消息管理', link: '/api/bot-api#消息管理' },
                             { text: '群管理', link: '/api/bot-api#群管理' },
