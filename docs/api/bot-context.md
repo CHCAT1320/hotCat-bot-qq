@@ -30,13 +30,25 @@ bot.event.message.onGroupMessage(async (bot, event) => {
 
 ### reply(...messages)
 
+```ts
+await ctx.reply(Message.text('收到'))
+```
+
 引用回复当前消息；群聊/私聊自动判断。
 
 ### send(...messages)
 
+```ts
+await ctx.send(Message.text('处理完成'))
+```
+
 发送到当前会话，不引用。
 
 ### at()
+
+```ts
+await ctx.reply(ctx.at(), Message.text('你好'))
+```
 
 返回 `@发送者` 的消息段。
 

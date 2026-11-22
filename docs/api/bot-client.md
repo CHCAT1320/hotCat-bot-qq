@@ -15,6 +15,16 @@ new BotClient(config: BotConfig)
 
 ### BotConfig
 
+```ts
+interface BotConfig {
+    baseUrl: string
+    accessToken?: string
+    owner: number
+    reconnection?: { enable?: boolean; attempts?: number; delay?: number }
+    apiTimeout?: number
+}
+```
+
 | 字段 | 类型 | 必填 | 说明 |
 |---|---|---|---|
 | `baseUrl` | `string` | 是 | NapCat WebSocket 地址，必须以 `ws://` 或 `wss://` 开头，未配置或格式错误会抛出错误 |

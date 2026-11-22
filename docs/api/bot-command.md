@@ -53,17 +53,36 @@ bot.command.use(async (ctx, next) => {
 
 ### remove(name)
 
+```ts
+bot.command.remove('ping')
+```
+
 移除命令及其别名。
 
 ### list()
+
+```ts
+const commands = bot.command.list()
+for (const cmd of commands) {
+    console.log(cmd.name, cmd.permission, cmd.description)
+}
+```
 
 返回已注册命令列表。
 
 ### attach()
 
+```ts
+bot.command.attach()
+```
+
 开始监听消息事件，`bot.start()` 会自动调用。
 
 ### detach()
+
+```ts
+bot.command.detach()
+```
 
 停止监听消息事件，`bot.stop()` 会自动调用。
 
