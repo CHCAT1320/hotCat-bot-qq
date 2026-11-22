@@ -163,25 +163,21 @@ export const formatMessage = (m: Message): string => {
             return `${colors.gray}[回复]${colors.reset}`;
         case 'image': {
             const f = sanitize(String(m.data.file || ''));
-            const short = f.length > 60 ? f.slice(0, 57) + '...' : f;
-            return `${colors.magenta}[图片:${short}]${colors.reset}`;
+            return `${colors.magenta}[图片:${f}]${colors.reset}`;
         }
         case 'face':
             return `${colors.yellow}[表情:${m.data.id}]${colors.reset}`;
         case 'record': {
             const f = sanitize(String(m.data.file || ''));
-            const short = f.length > 60 ? f.slice(0, 57) + '...' : f;
-            return `${colors.brightYellow}[语音:${short}]${colors.reset}`;
+            return `${colors.brightYellow}[语音:${f}]${colors.reset}`;
         }
         case 'video': {
             const f = sanitize(String(m.data.file || ''));
-            const short = f.length > 60 ? f.slice(0, 57) + '...' : f;
-            return `${colors.brightMagenta}[视频:${short}]${colors.reset}`;
+            return `${colors.brightMagenta}[视频:${f}]${colors.reset}`;
         }
         case 'file': {
             const f = sanitize(String(m.data.name || m.data.file || ''));
-            const short = f.length > 60 ? f.slice(0, 57) + '...' : f;
-            return `${colors.brightCyan}[文件:${short}]${colors.reset}`;
+            return `${colors.brightCyan}[文件:${f}]${colors.reset}`;
         }
         case 'json': {
             const raw = shortText(String(m.data.data ?? ''));
