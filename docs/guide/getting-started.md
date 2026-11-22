@@ -92,11 +92,14 @@ bun bot.ts
 - [监听私聊消息](#监听私聊消息)
 - [发送消息](#发送消息)
 - [日志输出](#日志输出)
+- [命令](#命令)
+- [存储](#存储)
 - [撤回消息](#撤回消息)
 - [禁言](#禁言)
 - [定时任务](#定时任务)
 - [处理加好友请求](#处理加好友请求)
 - [处理加群邀请](#处理加群邀请)
+- [优雅退出与多实例](#优雅退出与多实例)
 - [常用模式](#常用模式)
 
 ::: tip 简化写法
@@ -167,6 +170,34 @@ new BotConsole('plugin', { name: 'myPlugin', msg: '已加载' }).log()
 
 详见 [BotConsole](/api/bot-console)。
 
+### 命令
+
+```ts
+bot.command.command('ping', async (ctx) => {
+    await ctx.reply(Message.text('pong'))
+})
+
+bot.command.command('ban', async (ctx) => {
+    await ctx.send(Message.text(`参数: ${ctx.argText}`))
+}, {
+    permission: 'admin',
+    cooldown: 3000,
+    scope: 'group',
+})
+```
+
+默认前缀为 `#`，可通过 `commandPrefix` 修改。中间件使用 `bot.command.use()`。
+
+### 存储
+
+```ts
+bot.storage.set('count', 1)
+const user = bot.storage.namespace('user')
+user.set('123', { name: 'test' })
+```
+
+插件中使用 `this.storage` 和 `this.config`，详见 [BotStorage](/api/bot-storage)。
+
 ### 撤回消息
 
 ```ts
@@ -223,6 +254,28 @@ bot.scheduler.at('23:59', () => {
     bot.api.sendGroupMessage(12345678, Message.text('晚安'))
 })
 ```
+
+### 优雅退出与多实例
+
+`bot.start()` 默认处理 `SIGINT` / `SIGTERM`，收到信号会卸载插件、取消任务并断开连接。也可以手动调用：
+
+```ts
+await bot.stop()
+```
+
+多个 bot 使用不同插件目录和存储即可：
+
+```ts
+const bot2 = new BotClient({
+    ...config,
+    owner: 987654321,
+    pluginDir: './plugins-b',
+    storagePath: './data/bot2.json',
+    commandPrefix: '!',
+})
+```
+
+`bot.status` 和 `bot.onStatusChange()` 可用于监控连接状态。
 
 ## 常用模式
 

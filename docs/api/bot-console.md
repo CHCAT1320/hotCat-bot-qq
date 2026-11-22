@@ -28,7 +28,35 @@ new BotConsole(type: BotConsoleType, content: ...)
 
 `groupMessage`、`privateMessage`、`notice` 等类型供框架内部格式化事件使用，需要传入对应事件对象，外部一般使用 `system` / `error` / `plugin`。
 
-完整 `BotConsoleType`：`system`、`groupMessage`、`privateMessage`、`error`、`sendGroupMessage`、`sendPrivateMessage`、`groupMessageSelf`、`privateMessageSelf`、`requestFriend`、`requestGroupAdd`、`requestGroupInvite`、`notice`、`plugin`。
+完整 `BotConsoleType`：`system`、`groupMessage`、`privateMessage`、`error`、`sendGroupMessage`、`sendPrivateMessage`、`groupMessageSelf`、`privateMessageSelf`、`requestFriend`、`requestGroupAdd`、`requestGroupInvite`、`notice`、`plugin`、`debug`、`info`、`warn`。
+
+## 全局配置
+
+```ts
+BotConsole.configure({
+    level: 'info',
+    timestamps: true,
+    file: './logs/bot.log',
+    maxSize: 5 * 1024 * 1024,
+    maxFiles: 5,
+    json: false,
+    onLog: (entry) => {
+        // 接入 Sentry 等
+    },
+})
+```
+
+| 选项 | 说明 |
+|---|---|
+| `level` | 最低级别：`debug` / `info` / `warn` / `error` / `silent` |
+| `timestamps` | 是否输出 ISO 时间戳 |
+| `file` | 日志文件路径，自动创建目录 |
+| `maxSize` | 单文件最大字节数，超过后轮转 |
+| `maxFiles` | 保留的历史文件数量 |
+| `json` | 使用 JSON Lines 输出 |
+| `onLog` | 每条日志回调，可用于错误上报 |
+
+`BotConsole.reset()` 恢复默认配置，`BotConsole.getOptions()` 读取当前配置。
 
 ## log()
 

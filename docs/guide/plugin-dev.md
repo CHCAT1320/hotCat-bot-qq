@@ -69,6 +69,8 @@ export class HelloPlugin extends PluginBase {
 | `this.api` | `BotApi` | 所有 napcat API |
 | `this.bot` | `BotClient` | bot 实例，包含 event/scheduler/plugin |
 | `this.meta` | `PluginMeta` | 插件元数据 `{ name, version, description? }` |
+| `this.storage` | `NamespacedStorage` | 插件独立存储，自动按插件名隔离 |
+| `this.config` | `Record<string, any>` | 插件配置，来自 `config.json` 与默认值合并 |
 
 通过 `this.bot.online` 可判断 bot QQ 是否在线，`this.bot.owner` 是配置的管理员 QQ 号，`this.bot.isOwner(qq)` 可直接判断某个 QQ 号是否为管理员。
 
@@ -80,6 +82,35 @@ import { BotConsole } from 'hotcat-bot-qq'
 new BotConsole('plugin', { name: this.meta.name, msg: '插件已加载' }).log()
 new BotConsole('error', '处理消息失败').log()
 ```
+
+### 配置与存储
+
+在插件目录放置 `config.json`，会与 `static meta.config` 默认值合并：
+
+```ts
+static meta = {
+    name: 'myPlugin',
+    version: '1.0.0',
+    config: { prefix: '!' },
+}
+
+async load() {
+    const prefix = this.config.prefix
+    this.storage.set('lastRun', Date.now())
+}
+```
+
+### 依赖
+
+```ts
+static meta = {
+    name: 'child',
+    version: '1.0.0',
+    dependencies: ['base'],
+}
+```
+
+`scan()` 会先加载被依赖插件；`disable()` 持久化禁用状态，`enable()` 重新加载。
 
 ### PluginMeta
 

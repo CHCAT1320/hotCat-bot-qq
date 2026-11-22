@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Typecheck
+        run: bun run typecheck
+
+      - name: Test
+        run: bun test
+
+      - name: Build
+        run: bun run build:plugin
+
+      - name: Docs drift check
+        run: bun run docs:check
+
+      - name: Build docs
+        run: bun run docs:build
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Node import smoke test
+        run: node -e "import('./dist/index.js').then(m => { if (!m.BotClient || !m.BotScheduler) process.exit(1); console.log('node import ok') })"

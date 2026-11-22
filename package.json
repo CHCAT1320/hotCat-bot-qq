@@ -26,6 +26,18 @@
       "types": "./dist/botConsole.d.ts",
       "default": "./dist/botConsole.js"
     },
+    "./botContext": {
+      "types": "./dist/botContext.d.ts",
+      "default": "./dist/botContext.js"
+    },
+    "./botCommand": {
+      "types": "./dist/botCommand.d.ts",
+      "default": "./dist/botCommand.js"
+    },
+    "./botStorage": {
+      "types": "./dist/botStorage.d.ts",
+      "default": "./dist/botStorage.js"
+    },
     "./botEvent": {
       "types": "./dist/botEvent.d.ts",
       "default": "./dist/botEvent.js"
@@ -53,11 +65,19 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json && node scripts/fix-dist-extensions.mjs",
     "build:plugin": "bun run build && tsc --outDir plugins/hotCatPlugin --rootDir plugins/hotCatPlugin --module ESNext --target ES2020 --moduleResolution bundler --declaration --skipLibCheck plugins/hotCatPlugin/index.ts",
-    "prepublishOnly": "bun run build:plugin",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "bun test",
+    "docs:check": "node scripts/check-docs.mjs",
+    "prepublishOnly": "bun run typecheck && bun test && bun run docs:check && bun run build:plugin",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs"
   },
+  "engines": {
+    "node": ">=18",
+    "bun": ">=1.1"
+  },
+  "packageManager": "bun@1.3.13",
   "keywords": [
     "qq",
     "bot",
@@ -75,9 +95,10 @@
   "dependencies": {
     "node-napcat-ts": "^0.4.25",
     "node-schedule": "^2.1.1",
-    "@types/node": "^26.1.2"
+    "cron-parser": "^4.9.0"
   },
   "devDependencies": {
+    "@types/node": "^26.1.2",
     "@types/node-schedule": "^2.1.8",
     "dependency-cruiser": "^17.4.3",
     "madge": "^8.0.0",

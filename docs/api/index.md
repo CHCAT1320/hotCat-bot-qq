@@ -13,8 +13,11 @@ HotCat Bot 所有公共 API 按类组织：
 | [BotApi](/api/bot-api) | `bot.api.xxx()` | 所有 napcat API 的统一封装 |
 | [BotEvent](/api/bot-event) | `bot.event.xxx()` | 事件监听，按类别分组 |
 | [BotScheduler](/api/bot-scheduler) | `bot.scheduler.xxx()` | 定时任务调度 |
-| [BotPluginSystem](/api/bot-plugin) | `bot.plugin.xxx()` | 插件注册、加载、热重载、目录监听 |
+| [BotPluginSystem](/api/bot-plugin) | `bot.plugin.xxx()` | 插件注册、加载、热重载、目录监听、依赖与配置 |
 | [BotConsole](/api/bot-console) | `new BotConsole(type, content).log()` | 控制台日志输出与格式化工具 |
+| [BotCommandSystem](/api/bot-command) | `bot.command.xxx()` | 命令、中间件、权限与冷却 |
+| [BotStorage](/api/bot-storage) | `bot.storage.xxx()` | JSON 键值存储与命名空间 |
+| [MessageContext](/api/bot-context) | `bot.context(event)` | 消息回复、撤回与权限判断 |
 | [Message](/api/message) | `Message.xxx()` | 消息段构建器 |
 
 ## 架构
@@ -30,10 +33,13 @@ BotClient
  │    └── notice: NoticeEvent         (通知事件)
  ├── scheduler: BotScheduler → bot.scheduler.cron(...)
  ├── plugin: BotPluginSystem → bot.plugin.register(...)
+ ├── command: BotCommandSystem → bot.command.command(...)
+ ├── storage: BotStorage    → bot.storage.get(...)
  ├── nickname: string     (bot 昵称)
  ├── id: number           (bot QQ 号)
  ├── owner: number        (bot 主人 / 管理员 QQ 号)
- └── online: boolean      (bot QQ 是否在线)
+ ├── online: boolean      (bot QQ 是否在线)
+ └── status: BotConnectionState (连接状态)
 ```
 
 ## 快速索引
@@ -42,7 +48,7 @@ BotClient
 
 | 分类 | 方法数 | 常用方法 |
 |---|---|---|
-| 连接 | 1 | `connect` |
+| 连接 | 2 | `connect`, `disconnect` |
 | 消息发送 | 8 | `sendMessage`, `sendGroupMessage`, `sendPrivateMessage`, `sendForwardMsg` |
 | 消息管理 | 12 | `deleteMessage`, `getMessage`, `markMsgAsRead`, `translateEn2zh` |
 | 群管理 | 12 | `banMember`, `kickMember`, `setGroupAdmin`, `setGroupCard` |
@@ -75,5 +81,8 @@ BotClient
 | `cron()` | cron 表达式 | `cron('0 8 * * *', fn)` |
 | `every()` | 固定间隔 | `every('5m', fn)` |
 | `at()` | 指定时间 | `at('08:00', fn)` |
+| `define()` | 注册命名任务处理器 | `define('daily', fn)` |
+| `schedule()` | 调度并持久化命名任务 | `schedule('daily', 'cron', '0 8 * * *')` |
+| `restore()` | 还原持久化任务 | `restore()` |
 | `cancel()` | 取消任务 | `cancel(id)` |
 | `cancelAll()` | 取消全部 | `cancelAll()` |

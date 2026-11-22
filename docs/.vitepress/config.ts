@@ -123,6 +123,9 @@ export default defineConfig({
                     { text: 'BotScheduler', link: '/api/bot-scheduler' },
                     { text: 'BotPluginSystem', link: '/api/bot-plugin' },
                     { text: 'BotConsole', link: '/api/bot-console' },
+                    { text: 'BotCommandSystem', link: '/api/bot-command' },
+                    { text: 'BotStorage', link: '/api/bot-storage' },
+                    { text: 'MessageContext', link: '/api/bot-context' },
                 ],
             },
             {

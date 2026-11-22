@@ -22,12 +22,12 @@
     },
 
     /* Linting */
-    "strict": false,
+    "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-    "strictNullChecks": false
+    "noFallthroughCasesInSwitch": true
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue", "*.ts", "plugins/**/*.ts"],
+  "exclude": ["indexOld.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

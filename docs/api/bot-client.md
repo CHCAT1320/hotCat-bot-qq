@@ -24,6 +24,26 @@ new BotClient(config: BotConfig)
 | `reconnection.attempts` | `number` | 否 | 最大重连次数，默认 `Infinity`（一直重试） |
 | `reconnection.delay` | `number` | 否 | 重连间隔(ms)，默认 5000 |
 | `apiTimeout` | `number` | 否 | API 超时(ms)，默认 120000 |
+| `pluginDir` | `string` | 否 | 插件目录，默认 `./plugins` |
+| `autoLoadPlugins` | `boolean` | 否 | 是否自动扫描并监听插件目录，默认 true |
+| `handleSignals` | `boolean` | 否 | 是否处理 SIGINT/SIGTERM 优雅退出，默认 true |
+| `storagePath` | `string` | 否 | 存储文件路径，默认 `./data/storage.json` |
+| `commandPrefix` | `string \| string[]` | 否 | 命令前缀，默认 `#` |
+| `commandCooldownReply` | `boolean` | 否 | 命令冷却时是否回复提示，默认 false |
+| `log` | `BotConsoleOptions` | 否 | 日志配置，等价于 `BotConsole.configure()` |
+
+### 依赖注入
+
+```ts
+new BotClient(config, {
+    api?: BotApi,
+    event?: BotEvent,
+    scheduler?: BotScheduler,
+    storage?: BotStorage,
+})
+```
+
+可注入自定义组件，便于测试、多实例或替换实现。多实例时建议为每个 bot 配置不同的 `pluginDir`、`storagePath` 和 `commandPrefix`。
 
 ## 属性
 
@@ -33,6 +53,9 @@ new BotClient(config: BotConfig)
 | `event` | `BotEvent` | 事件监听入口 |
 | `scheduler` | `BotScheduler` | 定时任务入口 |
 | `plugin` | `BotPluginSystem` | 插件系统入口 |
+| `command` | `BotCommandSystem` | 命令系统入口 |
+| `storage` | `BotStorage` | JSON 键值存储 |
+| `status` | `BotConnectionState` | 当前连接状态 |
 | `nickname` | `string \| null` | 登录后 bot 昵称，启动前为 null |
 | `id` | `number \| null` | 登录后 bot QQ 号，启动前为 null |
 | `owner` | `number` | 配置的 Bot 主人（管理员）QQ 号 |
@@ -48,6 +71,30 @@ isOwner(qq: number): boolean
 
 判断指定 QQ 号是否为配置的 Bot 主人。
 
+### getStatus()
+
+```ts
+getStatus(): BotStatus
+```
+
+返回 `{ connection, online, attempts }` 状态快照。
+
+### onStatusChange(listener)
+
+```ts
+onStatusChange(listener: (status: BotStatus) => void): () => void
+```
+
+监听连接/在线状态变化，返回取消函数。状态包括 `idle`、`connecting`、`open`、`reconnecting`、`closed`、`stopped`。
+
+### context(event)
+
+```ts
+context(event: MessageEventLike): MessageContext
+```
+
+创建消息上下文，提供 `reply()`、`send()`、`recall()`、`isOwner`、`isAdmin` 等便捷方法。详见 [MessageContext](/api/bot-context)。
+
 ### start()
 
 ```ts
@@ -59,6 +106,14 @@ async start(): Promise<void>
 连接建立、断开、重连失败均会通过控制台输出提醒；默认断线后会一直按 `reconnection.delay` 间隔重试。若需限制次数，可设置 `reconnection.attempts`。
 
 框架同时监听 `notice.bot_offline`、`meta_event.lifecycle` 和心跳状态：bot QQ 掉线或恢复在线时会输出提醒并更新 `bot.online`。QQ 账号本身掉线后需要在 NapCat / QQ 端重新登录，框架不会自动重新登录账号。
+
+### stop()
+
+```ts
+async stop(): Promise<void>
+```
+
+优雅退出：卸载全部插件、取消定时任务、断开 WebSocket，并将状态设为 `stopped`。可重复调用。`handleSignals` 为 true 时，收到 SIGINT/SIGTERM 会自动调用它。
 
 ## 使用示例
 

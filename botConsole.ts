@@ -1,4 +1,6 @@
 import { GroupMessage, GroupMessageSelf, PrivateFriendMessage, PrivateGroupMessage, PrivateFriendMessageSelf, PrivateGroupMessageSelf, RequestFriend, RequestGroupAdd, RequestGroupInvite } from 'node-napcat-ts';
+import { appendFileSync, existsSync, mkdirSync, renameSync, statSync, unlinkSync } from 'fs';
+import { dirname } from 'path';
 import { Message } from './message';
 
 /** 私聊消息联合类型 */
@@ -9,8 +11,36 @@ export type PrivateMessageSelf = PrivateFriendMessageSelf | PrivateGroupMessageS
 export type RequestGroup = RequestGroupAdd | RequestGroupInvite;
 /** notice 事件通用类型 */
 export type NoticeEvent = Record<string, any> & { post_type: 'notice'; notice_type: string; sub_type?: string };
+/** 日志级别 */
+export type BotLogLevel = 'debug' | 'info' | 'warn' | 'error' | 'silent';
 /** BotConsole 日志分类 */
-export type BotConsoleType = 'system' | 'groupMessage' | 'privateMessage' | 'error' | 'sendGroupMessage' | 'sendPrivateMessage' | 'groupMessageSelf' | 'privateMessageSelf' | 'requestFriend' | 'requestGroupAdd' | 'requestGroupInvite' | 'notice' | 'plugin';
+export type BotConsoleType = 'system' | 'groupMessage' | 'privateMessage' | 'error' | 'sendGroupMessage' | 'sendPrivateMessage' | 'groupMessageSelf' | 'privateMessageSelf' | 'requestFriend' | 'requestGroupAdd' | 'requestGroupInvite' | 'notice' | 'plugin' | 'debug' | 'info' | 'warn';
+
+/** 单条日志记录 */
+export interface BotLogEntry {
+    time: string;
+    level: BotLogLevel;
+    type: BotConsoleType;
+    message: string;
+}
+
+/** BotConsole 全局配置 */
+export interface BotConsoleOptions {
+    /** 最低输出级别，默认 info */
+    level?: BotLogLevel;
+    /** 是否输出时间戳，默认 false */
+    timestamps?: boolean;
+    /** 日志文件路径，默认不写文件 */
+    file?: string;
+    /** 单个日志文件最大字节数，默认 5MB */
+    maxSize?: number;
+    /** 保留的历史文件数量，默认 5 */
+    maxFiles?: number;
+    /** 使用 JSON Lines 输出，默认 false */
+    json?: boolean;
+    /** 每条日志的回调，可用于接入 Sentry 等 */
+    onLog?: (entry: BotLogEntry) => void;
+}
 
 /** ANSI 颜色/样式码 */
 export const colors = {
@@ -88,6 +118,24 @@ export const formatError = (e: unknown): string => {
         return String(e);
     }
 };
+
+const LEVEL_RANK: Record<BotLogLevel, number> = { debug: 0, info: 1, warn: 2, error: 3, silent: 4 };
+const stripAnsi = (s: string): string => s.replace(/\x1b\[[0-9;]*m/g, '');
+const levelForType = (type: BotConsoleType): BotLogLevel => {
+    if (type === 'error') return 'error';
+    if (type === 'warn') return 'warn';
+    if (type === 'debug') return 'debug';
+    return 'info';
+};
+const defaultOptions = (): Required<Omit<BotConsoleOptions, 'onLog'>> & { onLog?: (entry: BotLogEntry) => void } => ({
+    level: 'info',
+    timestamps: false,
+    file: '',
+    maxSize: 5 * 1024 * 1024,
+    maxFiles: 5,
+    json: false,
+    onLog: undefined,
+});
 
 /**
  * 解析 CQ 码字符串为可读中文
@@ -214,20 +262,37 @@ export const formatMessage = (m: Message): string => {
  * - `sendGroupMessage` / `sendPrivateMessage`：解析发送的消息段并带颜色输出
  */
 export class BotConsole {
+    private static options = defaultOptions();
     public type: BotConsoleType;
     public content: string | GroupMessage | GroupMessageSelf | PrivateMessage | PrivateMessageSelf | Message[] | RequestFriend | RequestGroupAdd | RequestGroupInvite | NoticeEvent | { name: string; msg: string };
+
+    /** 配置全局日志输出 */
+    static configure(options: BotConsoleOptions): void {
+        BotConsole.options = { ...BotConsole.options, ...options };
+    }
+
+    /** 恢复默认配置 */
+    static reset(): void {
+        BotConsole.options = defaultOptions();
+    }
+
+    /** 当前日志配置 */
+    static getOptions(): Readonly<BotConsoleOptions> {
+        return { ...BotConsole.options };
+    }
+
     constructor(type: BotConsoleType, content: string | GroupMessage | GroupMessageSelf | PrivateMessage | PrivateMessageSelf | Message[] | RequestFriend | RequestGroupAdd | RequestGroupInvite | NoticeEvent | { name: string; msg: string }) {
         this.type = type;
         this.content = content;
     }
     log() {
         if (this.type === 'system') {
-            console.log(`${colors.green}[hotCatBotSystem]: ${colors.reset}`, this.content);
+            this.print(`${colors.green}[hotCatBotSystem]:${colors.reset}`, this.content);
         } else if (this.type === 'groupMessage') {
             const event = this.content as GroupMessage;
             const sender = sanitize(event.sender.card || event.sender.nickname);
             const roleText = event.sender.role === 'owner' ? '群主' : event.sender.role === 'admin' ? '管理' : '';
-            console.log(
+            this.print(
                 `${colors.cyan}[groupMessage]:${colors.reset} ` +
                 `${colors.yellow}群${colors.reset}(${colors.cyan}${event.group_id}${colors.reset}) ` +
                 `${colors.red}${roleText}${colors.reset} ` +
@@ -238,23 +303,23 @@ export class BotConsole {
             const event = this.content as PrivateMessage;
             const sender = sanitize(event.sender.nickname);
             const tag = event.sub_type === 'group' ? '群临时' : '好友';
-            console.log(
+            this.print(
                 `${colors.yellow}[privateMessage]:${colors.reset} ` +
                 `${colors.cyan}[${tag}]${colors.reset} ` +
                 `${colors.magenta}${sender}${colors.reset}(${colors.blue}${event.user_id}${colors.reset}): ` +
                 `${colors.green}${parseCQ(sanitize(event.raw_message))}${colors.reset}`
             );
         } else if (this.type === 'error') {
-            console.log(`${colors.red}[error]${colors.red}`, this.content);
+            this.print(`${colors.red}[error]${colors.red}`, this.content);
         } else if (this.type === 'sendGroupMessage') {
             const messages = this.content as Message[];
-            console.log(`${colors.green}[sendGroupMessage]:${colors.reset} ${messages.map(formatMessage).join('')}`);
+            this.print(`${colors.green}[sendGroupMessage]:${colors.reset} ${messages.map(formatMessage).join('')}`);
         } else if (this.type === 'sendPrivateMessage') {
             const messages = this.content as Message[];
-            console.log(`${colors.green}[sendPrivateMessage]:${colors.reset} ${messages.map(formatMessage).join('')}`);
+            this.print(`${colors.green}[sendPrivateMessage]:${colors.reset} ${messages.map(formatMessage).join('')}`);
         } else if (this.type === 'groupMessageSelf') {
             const event = this.content as GroupMessageSelf;
-            console.log(
+            this.print(
                 `${colors.cyan}[groupMessageSelf]:${colors.reset} ` +
                 `${colors.yellow}群${colors.reset}(${colors.cyan}${event.group_id}${colors.reset}): ` +
                 `${colors.green}${parseCQ(sanitize(event.raw_message))}${colors.reset}`
@@ -262,7 +327,7 @@ export class BotConsole {
         } else if (this.type === 'privateMessageSelf') {
             const event = this.content as PrivateMessageSelf;
             const tag = event.sub_type === 'group' ? '群临时' : '好友';
-            console.log(
+            this.print(
                 `${colors.yellow}[privateMessageSelf]:${colors.reset} ` +
                 `${colors.cyan}[${tag}]${colors.reset} ` +
                 `${colors.magenta}发送给${colors.reset}(${colors.blue}${event.user_id}${colors.reset}): ` +
@@ -270,21 +335,21 @@ export class BotConsole {
             );
         } else if (this.type === 'requestFriend') {
             const event = this.content as RequestFriend;
-            console.log(
+            this.print(
                 `${colors.yellow}[requestFriend]:${colors.reset} ` +
                 `用户(${colors.blue}${event.user_id}${colors.reset}) 请求添加好友` +
                 (event.comment ? ` 留言: ${colors.green}${sanitize(event.comment)}${colors.reset}` : '')
             );
         } else if (this.type === 'requestGroupAdd') {
             const event = this.content as RequestGroupAdd;
-            console.log(
+            this.print(
                 `${colors.yellow}[requestGroupAdd]:${colors.reset} ` +
                 `用户(${colors.blue}${event.user_id}${colors.reset}) 申请加入群(${colors.cyan}${event.group_id}${colors.reset})` +
                 (event.comment ? ` 留言: ${colors.green}${sanitize(event.comment)}${colors.reset}` : '')
             );
         } else if (this.type === 'requestGroupInvite') {
             const event = this.content as RequestGroupInvite;
-            console.log(
+            this.print(
                 `${colors.yellow}[requestGroupInvite]:${colors.reset} ` +
                 `用户(${colors.blue}${event.user_id}${colors.reset}) 邀请 bot 加入群(${colors.cyan}${event.group_id}${colors.reset})` +
                 (event.comment ? ` 留言: ${colors.green}${sanitize(event.comment)}${colors.reset}` : '')
@@ -294,7 +359,7 @@ export class BotConsole {
             const label = event.sub_type
                 ? `${event.notice_type}/${event.sub_type}`
                 : event.notice_type;
-            console.log(
+            this.print(
                 `${colors.cyan}[notice:${label}]:${colors.reset} ` +
                 (event.user_id != null ? `用户(${colors.blue}${event.user_id}${colors.reset}) ` : '') +
                 ('group_id' in event ? `群(${colors.cyan}${event.group_id}${colors.reset}) ` : '') +
@@ -308,7 +373,68 @@ export class BotConsole {
             );
         } else if (this.type === 'plugin') {
             const { name, msg } = this.content as { name: string; msg: string };
-            console.log(`${colors.magenta}[plugin:${name}]:${colors.reset} ${msg}`);
+            this.print(`${colors.magenta}[plugin:${name}]:${colors.reset} ${msg}`);
+        } else if (this.type === 'debug') {
+            this.print(`${colors.gray}[debug]${colors.reset} ${String(this.content)}`);
+        } else if (this.type === 'info') {
+            this.print(`${colors.cyan}[info]${colors.reset} ${String(this.content)}`);
+        } else if (this.type === 'warn') {
+            this.print(`${colors.yellow}[warn]${colors.reset} ${String(this.content)}`);
         }
+    }
+
+    private print(...args: unknown[]): void {
+        const text = args.map((arg) => typeof arg === 'string' ? arg : formatError(arg)).join(' ');
+        this.output(text, levelForType(this.type));
+    }
+
+    private output(text: string, level: BotLogLevel): void {
+        const options = BotConsole.options;
+        if (LEVEL_RANK[level] < LEVEL_RANK[options.level]) return;
+
+        const time = new Date().toISOString();
+        const plain = stripAnsi(text);
+
+        if (options.onLog) {
+            try {
+                options.onLog({ time, level, type: this.type, message: plain });
+            } catch {}
+        }
+
+        if (options.file) this.writeFile(plain, time, level);
+
+        if (options.json) {
+            console.log(JSON.stringify({ time, level, type: this.type, message: plain }));
+        } else {
+            console.log(`${options.timestamps ? `[${time}] ` : ''}${text}`);
+        }
+    }
+
+    private writeFile(text: string, time: string, level: BotLogLevel): void {
+        const options = BotConsole.options;
+        try {
+            const file = options.file;
+            mkdirSync(dirname(file), { recursive: true });
+            const line = options.json
+                ? `${JSON.stringify({ time, level, type: this.type, message: text })}\n`
+                : `${options.timestamps ? `[${time}] ` : ''}${text}\n`;
+            const size = existsSync(file) ? statSync(file).size : 0;
+            if (size > 0 && size + Buffer.byteLength(line) > options.maxSize) {
+                this.rotate(file, Math.max(1, options.maxFiles));
+            }
+            appendFileSync(file, line, 'utf8');
+        } catch (e) {
+            console.error(`[BotConsole] 写入日志文件失败: ${formatError(e)}`);
+        }
+    }
+
+    private rotate(file: string, maxFiles: number): void {
+        const oldest = `${file}.${maxFiles}`;
+        if (existsSync(oldest)) unlinkSync(oldest);
+        for (let i = maxFiles - 1; i >= 1; i--) {
+            const from = `${file}.${i}`;
+            if (existsSync(from)) renameSync(from, `${file}.${i + 1}`);
+        }
+        if (existsSync(file)) renameSync(file, `${file}.1`);
     }
 }

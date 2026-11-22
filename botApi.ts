@@ -26,6 +26,11 @@ export class BotApi {
         await this.napcat.connect();
     }
 
+    /** 主动断开 WebSocket 连接，不会触发自动重连 */
+    async disconnect() {
+        await this.napcat.disconnect();
+    }
+
     /** 发送前检查 bot 是否在线，离线时抛出明确错误 */
     private ensureOnline(): void {
         if (this._client && !this._client.online) {
@@ -872,8 +877,8 @@ export class BotApi {
     async setOnlineStatus(status: number, extStatus?: number, batteryStatus?: number) {
         await this.napcat.set_online_status({
             status,
-            ext_status: extStatus,
-            battery_status: batteryStatus,
+            ext_status: extStatus ?? 0,
+            battery_status: batteryStatus ?? 0,
         });
     }
 

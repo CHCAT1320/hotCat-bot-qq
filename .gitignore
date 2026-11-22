@@ -2,7 +2,6 @@ node_modules/
 dynamics/
 pockAudio/
 old.js
-bun.lock
 package-lock.json
 *.json
 !package.json
@@ -21,9 +20,14 @@ scripts
 !scripts/
 scripts/*
 !scripts/fix-dist-extensions.mjs
+!scripts/check-docs.mjs
 copyright/
 indexOld.ts
 .kilo
+.hotcat-cache/
+**/.hotcat-cache/
+data/
+logs/
 
 # vitepress
 docs/.vitepress/dist/

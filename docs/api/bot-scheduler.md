@@ -7,14 +7,33 @@ description: HotCat Bot 的 BotScheduler 定时任务调度器参考：通过 bo
 
 定时任务调度器，通过 `bot.scheduler` 访问。支持 cron 表达式、间隔时间、指定时间三种模式。
 
-支持异步回调；回调抛出的同步异常和 Promise 拒绝都会被捕获并通过控制台输出，不会导致进程退出。
+支持异步回调；回调抛出的同步异常和 Promise 拒绝都会被捕获并通过控制台输出，不会导致进程退出。支持时区、防止任务重叠、失败重试，以及命名任务持久化。
+
+## 任务选项
+
+```ts
+interface JobOptions {
+    name?: string
+    timezone?: string
+    noOverlap?: boolean
+    retry?: { attempts?: number; delay?: number }
+}
+```
+
+| 选项 | 说明 |
+|---|---|
+| `name` | 任务名，设置后可持久化 |
+| `timezone` | cron 时区，如 `Asia/Shanghai` |
+| `noOverlap` | 上次未执行完时跳过本次，默认 false |
+| `retry.attempts` | 总执行次数（包含第一次），默认 1 |
+| `retry.delay` | 重试间隔(ms)，默认 1000 |
 
 ## 方法
 
-### cron(expr, fn)
+### cron(expr, fn, options?)
 
 ```ts
-cron(expr: string, fn: () => void | Promise<void>): number
+cron(expr: string, fn: () => void | Promise<void>, options?: JobOptions): number
 ```
 
 标准 cron 表达式定时，返回 job id 可用于取消。无效表达式不会创建任务，并输出错误日志。
@@ -38,10 +57,10 @@ bot.scheduler.cron('*/30 * * * *', () => {
 })
 ```
 
-### every(time, fn)
+### every(time, fn, options?)
 
 ```ts
-every(time: number | string, fn: () => void | Promise<void>): number
+every(time: number | string, fn: () => void | Promise<void>, options?: JobOptions): number
 ```
 
 固定间隔重复执行。支持数字（毫秒）或可读字符串。
@@ -70,10 +89,10 @@ bot.scheduler.every('1h', () => { ... })
 bot.scheduler.every(60000, () => { ... })
 ```
 
-### at(time, fn)
+### at(time, fn, options?)
 
 ```ts
-at(time: string | Date, fn: () => void | Promise<void>): number
+at(time: string | Date, fn: () => void | Promise<void>, options?: JobOptions): number
 ```
 
 指定时间执行。`'08:00'` 格式为每日重复，`'YYYY-MM-DD HH:mm'` 或 `Date` 为一次性。无效日期不会创建任务，并输出错误日志；远期日期使用 `node-schedule` 调度，不受 `setTimeout` 上限影响。
@@ -88,6 +107,43 @@ bot.scheduler.at('2026-08-01 12:00', () => { ... })
 // Date 对象
 bot.scheduler.at(new Date('2026-08-01T12:00:00'), () => { ... })
 ```
+
+### define(name, handler)
+
+```ts
+define(name: string, handler: () => void | Promise<void>): this
+```
+
+注册命名任务处理器，供 `restore()` 还原持久化任务使用。
+
+### schedule(name, kind, spec, options?)
+
+```ts
+schedule(name: string, kind: 'cron' | 'every' | 'at', spec: string | number | Date, options?: JobOptions): number
+```
+
+调度命名任务并写入存储，进程重启后可通过 `restore()` 还原。
+
+```ts
+bot.scheduler.define('daily', () => { ... })
+bot.scheduler.schedule('daily', 'cron', '0 8 * * *', { timezone: 'Asia/Shanghai' })
+```
+
+### restore()
+
+```ts
+restore(): number
+```
+
+读取存储中的命名任务并重新调度，返回成功数量。`bot.start()` 会在插件加载后自动调用。
+
+### listJobs()
+
+```ts
+listJobs(): JobDefinition[]
+```
+
+返回可持久化的命名任务定义列表。
 
 ### cancel(id)
 
@@ -105,10 +161,10 @@ bot.scheduler.cancel(id)
 ### cancelAll()
 
 ```ts
-cancelAll(): void
+cancelAll(clearPersisted?: boolean): void
 ```
 
-取消全部定时任务。
+取消全部定时任务。`clearPersisted` 为 true 时同时删除持久化定义，默认 false。
 
 ## 完整示例
 

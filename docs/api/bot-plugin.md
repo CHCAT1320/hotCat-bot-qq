@@ -5,7 +5,9 @@ description: HotCat Bot 的 BotPluginSystem 插件管理器参考：通过 bot.p
 
 # BotPluginSystem
 
-插件管理器，通过 `bot.plugin` 访问。负责插件的注册、加载、卸载、热重载和目录监听。
+插件管理器，通过 `bot.plugin` 访问。负责插件的注册、加载、卸载、热重载、目录监听、依赖、启用/禁用、配置和独立存储。
+
+热重载会重新 import 入口文件；Bun 下通过同目录临时文件绕过 ESM 缓存。目录监听会检测新增、删除以及文件修改。
 
 ## 方法
 
@@ -41,6 +43,14 @@ async unload(name: string): Promise<void>
 
 卸载已加载的插件，调用 `instance.unload()`。
 
+### unloadAll()
+
+```ts
+async unloadAll(): Promise<void>
+```
+
+卸载全部已加载插件，单个插件失败不会中断其他插件。
+
 ### reload(name)
 
 ```ts
@@ -73,13 +83,53 @@ loaded(): string[]
 
 返回所有已加载的插件名。
 
+### isEnabled(name)
+
+```ts
+isEnabled(name: string): boolean
+```
+
+插件是否启用。
+
+### enable(name)
+
+```ts
+async enable(name: string): Promise<void>
+```
+
+启用插件并尝试加载。
+
+### disable(name)
+
+```ts
+async disable(name: string): Promise<void>
+```
+
+禁用插件并卸载，状态持久化到 `bot.storage`。
+
+### getConfig(name)
+
+```ts
+getConfig(name: string): Record<string, any>
+```
+
+读取插件目录下的 `config.json`，并与 `meta.config` 默认值合并。
+
+### saveConfig(name, config)
+
+```ts
+saveConfig(name: string, config: Record<string, any>): void
+```
+
+保存配置到插件目录下的 `config.json`。
+
 ### scan(dir, autoLoad?)
 
 ```ts
 async scan(dir: string, autoLoad?: boolean): Promise<string[]>
 ```
 
-扫描目录下所有插件并加载。`autoLoad` 默认 `true`。
+扫描目录下所有插件并加载。`autoLoad` 默认 `true`。禁用的插件会注册但不加载；依赖会先于被依赖插件加载。
 
 - 遍历 `dir` 下所有子目录
 - 检查 `index.ts` 或 `index.js`（两文件同时存在时 `.js` 优先，确保 Node.js 兼容）
@@ -92,7 +142,7 @@ async scan(dir: string, autoLoad?: boolean): Promise<string[]>
 watch(dir: string, interval?: number): void
 ```
 
-启动目录监听，`interval` 默认 5000ms。新增目录 → 自动加载，删除目录 → 自动卸载。
+启动目录监听，`interval` 默认 5000ms。新增目录自动加载，删除目录自动卸载，已有插件文件变更自动热重载。
 
 ### unwatch()
 

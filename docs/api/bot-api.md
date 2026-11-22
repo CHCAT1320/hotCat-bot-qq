@@ -19,6 +19,12 @@ async connect(): Promise<void>
 ```
 建立底层 NapCat WebSocket 连接。通常由 `bot.start()` 自动调用；手动调用不会初始化事件、插件和登录信息，一般不需要直接使用。
 
+### disconnect()
+```ts
+async disconnect(): Promise<void>
+```
+主动断开 WebSocket，不会触发自动重连。`bot.stop()` 会自动调用。
+
 ## 消息发送
 
 所有 API 调用都会在发起前检查 `bot.online`；bot 离线（QQ 掉线或 WebSocket 未连接）时不会实际请求 NapCat：发送方法抛出 `bot 当前离线（QQ 掉线或连接未建立），消息未发送`，其他方法抛出 `bot 当前离线（QQ 掉线或连接未建立），API 调用未执行`。事件监听与定时任务中的异常会被框架捕获并输出到控制台；在普通代码中直接调用时，请自行 `try/catch`。`getLoginInfo()` 在登录前也可调用。

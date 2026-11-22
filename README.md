@@ -41,10 +41,13 @@ bot.event.message.onGroupMessage(async (bot, event) => {
 - **类型安全** — 完整的 TypeScript 类型推导，封装 napcat 全部 API
 - **消息段构建** — `Message` 类支持文本、图片、表情、文件等所有消息类型
 - **事件系统** — `BotEvent` 按类别分组暴露 message/messageSent/request/notice 事件
-- **定时任务** — `BotScheduler` 支持 cron 表达式、固定间隔、指定时间
-- **插件系统** — 继承 `PluginBase` 即可开发插件，支持热重载、目录监听自动加载，`scan` + `watch` 零配置接入
-- **连接状态** — 自动重连 NapCat，检测 bot QQ 掉线并通过 `bot.online` 提供状态
-- **日志工具** — `BotConsole` 统一控制台输出，支持消息段、JSON 和异常格式化
+- **定时任务** — `BotScheduler` 支持 cron、固定间隔、指定时间、时区、防重叠、重试和命名任务持久化
+- **插件系统** — 继承 `PluginBase` 即可开发插件，支持真实热重载、依赖、启用/禁用、独立配置与存储
+- **命令系统** — 内置命令解析、中间件、权限和冷却，快速实现管理指令
+- **连接状态** — 自动重连 NapCat，检测 bot QQ 掉线，提供 `bot.status` / `onStatusChange`
+- **优雅退出** — `bot.stop()` 统一卸载插件、取消任务并断开连接，支持 SIGINT/SIGTERM
+- **数据存储** — `BotStorage` JSON 键值存储，支持命名空间隔离
+- **日志工具** — `BotConsole` 支持级别、时间戳、文件轮转、JSON Lines 和错误上报回调
 
 ## 文档
 
