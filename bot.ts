@@ -35,7 +35,7 @@ bot.event.message.onGroupMessage(async (bot, event) => {
     for (const message of event.message) {
         if (message.type === 'text') {
             if (message.data.text === '回应续标识') {
-                await bot.api.setMsgEmojiLike(event.message_id, '424');
+                await bot.api.setMsgEmojiLike(event.message_id, 424);
             }
         }
     }
