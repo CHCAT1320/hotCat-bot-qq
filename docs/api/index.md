@@ -14,6 +14,7 @@ HotCat Bot 所有公共 API 按类组织：
 | [BotEvent](/api/bot-event) | `bot.event.xxx()` | 事件监听，按类别分组 |
 | [BotScheduler](/api/bot-scheduler) | `bot.scheduler.xxx()` | 定时任务调度 |
 | [BotPluginSystem](/api/bot-plugin) | `bot.plugin.xxx()` | 插件注册、加载、热重载、目录监听 |
+| [BotConsole](/api/bot-console) | `new BotConsole(type, content).log()` | 控制台日志输出与格式化工具 |
 | [Message](/api/message) | `Message.xxx()` | 消息段构建器 |
 
 ## 架构

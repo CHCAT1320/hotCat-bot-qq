@@ -121,6 +121,7 @@ export default defineConfig({
                     { text: 'BotEvent', link: '/api/bot-event' },
                     { text: 'BotScheduler', link: '/api/bot-scheduler' },
                     { text: 'BotPluginSystem', link: '/api/bot-plugin' },
+                    { text: 'BotConsole', link: '/api/bot-console' },
                 ],
             },
             {
