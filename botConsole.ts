@@ -45,10 +45,8 @@ export const colors = {
 const sanitize = (s: string): string =>
     s.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F\u200B-\u200F\u202A-\u202E\u2060\uFEFF]/g, '');
 
-const shortText = (s: string, max = 200): string => {
-    const oneLine = sanitize(s).replace(/\s+/g, ' ').trim();
-    return oneLine.length > max ? `${oneLine.slice(0, max - 3)}...` : oneLine;
-};
+const shortText = (s: string): string =>
+    sanitize(s).replace(/\s+/g, ' ').trim();
 
 /** 按 CQ 码顶层逗号拆分参数，忽略 JSON 对象/数组和引号内的逗号 */
 const splitCQParams = (params: string): Record<string, string> => {
