@@ -87,6 +87,12 @@ describe('BotCommandSystem', () => {
         (bot.api.napcat as any).emit('message.group', groupEvent('#secret', 999));
         await new Promise((resolve) => setTimeout(resolve, 30));
         expect(result).toEqual({ args: ['a', 'b'], owner: true });
+
+        bot.command.setPrefix('!');
+        result = null;
+        (bot.api.napcat as any).emit('message.group', groupEvent('!ping c', 123));
+        await new Promise((resolve) => setTimeout(resolve, 30));
+        expect(result).toEqual({ args: ['c'], owner: true });
     });
 });
 

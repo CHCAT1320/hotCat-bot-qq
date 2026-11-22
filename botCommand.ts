@@ -76,9 +76,37 @@ export class BotCommandSystem {
     private privateHandler = (bot: BotClient, event: MessageEventLike) => this.handle(bot, event);
 
     constructor(private bot: BotClient, options: CommandSystemOptions = {}) {
-        this.prefixes = Array.isArray(options.prefix) ? options.prefix : [options.prefix ?? '#'];
-        this.prefixes = this.prefixes.filter(Boolean);
+        this.prefixes = this.normalizePrefixes(options.prefix);
         this.cooldownReply = options.cooldownReply ?? false;
+    }
+
+    /** 修改命令系统配置，可在运行时调用 */
+    configure(options: CommandSystemOptions): this {
+        if (options.prefix !== undefined) this.setPrefix(options.prefix);
+        if (options.cooldownReply !== undefined) this.setCooldownReply(options.cooldownReply);
+        return this;
+    }
+
+    /** 设置命令前缀，传空值时回退为 `#` */
+    setPrefix(prefix: string | string[]): this {
+        this.prefixes = this.normalizePrefixes(prefix);
+        return this;
+    }
+
+    /** 获取当前前缀列表 */
+    getPrefixes(): string[] {
+        return [...this.prefixes];
+    }
+
+    /** 设置冷却时是否回复提示 */
+    setCooldownReply(enabled: boolean): this {
+        this.cooldownReply = enabled;
+        return this;
+    }
+
+    private normalizePrefixes(prefix?: string | string[]): string[] {
+        const list = (Array.isArray(prefix) ? prefix : prefix ? [prefix] : []).filter(Boolean);
+        return list.length ? list : ['#'];
     }
 
     /** 注册全局中间件，按注册顺序执行 */

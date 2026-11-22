@@ -24,9 +24,50 @@ const bot = new BotClient({
 })
 ```
 
-也可以在创建命令系统时直接传 `prefix`（一般不需要）。
+也可以在运行时直接配置命令系统：
+
+```ts
+bot.command.configure({ prefix: '!', cooldownReply: true })
+bot.command.setPrefix(['#', '/'])
+console.log(bot.command.getPrefixes())
+```
+
+`BotConfig.commandPrefix` 只是创建时的快捷方式，最终仍由 `bot.command` 管理。
 
 ## 方法
+
+### configure(options)
+
+```ts
+bot.command.configure({ prefix: ['#', '/'], cooldownReply: true })
+```
+
+运行时修改前缀和冷却提示。
+
+### setPrefix(prefix)
+
+```ts
+bot.command.setPrefix('!')
+bot.command.setPrefix(['#', '/'])
+```
+
+设置命令前缀，空值回退为 `#`。
+
+### getPrefixes()
+
+```ts
+const prefixes = bot.command.getPrefixes()
+```
+
+获取当前前缀列表。
+
+### setCooldownReply(enabled)
+
+```ts
+bot.command.setCooldownReply(true)
+```
+
+设置冷却时是否回复提示。
 
 ### command(names, handler, options?)
 
