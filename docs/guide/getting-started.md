@@ -186,7 +186,17 @@ bot.command.command('ban', async (ctx) => {
 })
 ```
 
-默认前缀为 `#`，可通过 `commandPrefix` 修改。中间件使用 `bot.command.use()`。
+默认前缀为 `#`，可通过 `commandPrefix` 修改：
+
+```ts
+const bot = new BotClient({
+    // ...
+    commandPrefix: '!',          // 单个前缀
+    // commandPrefix: ['#', '/'], // 多个前缀
+})
+```
+
+中间件使用 `bot.command.use()`。
 
 ### 存储
 

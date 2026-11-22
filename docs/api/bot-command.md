@@ -13,7 +13,18 @@ bot.command.command('ping', async (ctx) => {
 })
 ```
 
-默认前缀为 `#`，可通过 `commandPrefix` 配置修改。
+默认前缀为 `#`，可通过 `BotConfig.commandPrefix` 修改：
+
+```ts
+const bot = new BotClient({
+    // ...
+    commandPrefix: '!',
+    // 或配置多个前缀
+    // commandPrefix: ['#', '/'],
+})
+```
+
+也可以在创建命令系统时直接传 `prefix`（一般不需要）。
 
 ## 方法
 
