@@ -7,6 +7,10 @@ description: HotCat Bot 的 BotApi 完整方法参考：统一封装 NapCat / On
 
 所有 napcat API 的统一封装，通过 `bot.api.xxx()` 调用。
 
+::: tip ID 类型约定
+QQ 号、群号、消息号、表情 ID、公告 ID 等数值型 ID 统一使用 `number`。文件 ID、文件夹 ID、音乐 ID、AI 角色 ID 是平台提供的不透明字符串，保持 `string`。
+:::
+
 ## 消息发送
 
 所有 API 调用都会在发起前检查 `bot.online`；bot 离线（QQ 掉线或 WebSocket 未连接）时直接抛出 `bot 当前离线（QQ 掉线或连接未建立），API 调用未执行`，不会实际请求 NapCat。事件监听与定时任务中的异常会被框架捕获并输出到控制台；在普通代码中直接调用时，请自行 `try/catch`。`getLoginInfo()` 在登录前也可调用。
@@ -128,13 +132,13 @@ async markAllAsRead(): Promise<void>
 
 ### setMsgEmojiLike(messageId, emojiId, set?)
 ```ts
-async setMsgEmojiLike(messageId: number, emojiId: string, set?: boolean): Promise<void>
+async setMsgEmojiLike(messageId: number, emojiId: number, set?: boolean): Promise<void>
 ```
 设置消息表情回应，`set` 为 true 添加、false 移除。
 
 ### fetchEmojiLike(messageId, emojiId?)
 ```ts
-async fetchEmojiLike(messageId: number, emojiId?: string): Promise<object>
+async fetchEmojiLike(messageId: number, emojiId?: number): Promise<object>
 ```
 拉取消息上的表情回应列表。
 
@@ -232,7 +236,7 @@ async getGroupNotice(groupId: number): Promise<object>
 
 ### deleteGroupNotice(groupId, noticeId)
 ```ts
-async deleteGroupNotice(groupId: number, noticeId: string): Promise<void>
+async deleteGroupNotice(groupId: number, noticeId: number): Promise<void>
 ```
 删除指定群公告。
 

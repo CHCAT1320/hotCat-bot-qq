@@ -44,7 +44,7 @@ export class Message {
     }
 
     /** @某人，传 QQ 号或 `'all'`（发+收） */
-    static at(qq: string | number) {
+    static at(qq: number | 'all') {
         return new Message('at', { qq: String(qq) });
     }
 
@@ -54,12 +54,12 @@ export class Message {
     }
 
     /** QQ 表情，传表情 ID（发+收） */
-    static face(id: string | number) {
+    static face(id: number) {
         return new Message('face', { id: String(id) });
     }
 
     /** 商城表情（仅发送，接收时归入 image 段） */
-    static mface(emoji_id: string | number, emoji_package_id: string | number, key: string, summary?: string) {
+    static mface(emoji_id: number, emoji_package_id: number, key: string, summary?: string) {
         return new Message('mface', { emoji_id: String(emoji_id), emoji_package_id: String(emoji_package_id), key, summary: summary ?? '' });
     }
 
@@ -69,7 +69,7 @@ export class Message {
     }
 
     /** 引用回复，传消息 ID（发+收） */
-    static reply(id: string | number) {
+    static reply(id: number) {
         return new Message('reply', { id: String(id) });
     }
 
@@ -119,7 +119,7 @@ export class Message {
     }
 
     /** 合并转发节点（引用已有消息，仅发送） */
-    static node(id: string | number, user_id?: string | number, nickname?: string, source?: string, news?: { text: string }[], summary?: string, prompt?: string, time?: string | number) {
+    static node(id: number, user_id?: number, nickname?: string, source?: string, news?: { text: string }[], summary?: string, prompt?: string, time?: string | number) {
         return new Message('node', {
             id: String(id),
             user_id: user_id != null ? String(user_id) : '',
@@ -133,7 +133,7 @@ export class Message {
     }
 
     /** 合并转发节点（自定义内容，仅发送） */
-    static customNode(content: Message[], user_id?: string | number, nickname?: string, source?: string, news?: { text: string }[], summary?: string, prompt?: string, time?: string | number) {
+    static customNode(content: Message[], user_id?: number, nickname?: string, source?: string, news?: { text: string }[], summary?: string, prompt?: string, time?: string | number) {
         return new Message('node', {
             content: content.map(m => m.toJson()),
             user_id: user_id != null ? String(user_id) : '',
@@ -152,7 +152,7 @@ export class Message {
     }
 
     /** 推荐联系人/群（仅发送） */
-    static contact(type: 'qq' | 'group', id: string | number) {
+    static contact(type: 'qq' | 'group', id: number) {
         return new Message('contact', { type, id: String(id) });
     }
 

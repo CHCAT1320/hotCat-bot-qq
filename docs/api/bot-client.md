@@ -42,7 +42,7 @@ new BotClient(config: BotConfig)
 ### isOwner()
 
 ```ts
-isOwner(qq: number | string): boolean
+isOwner(qq: number): boolean
 ```
 
 判断指定 QQ 号是否为配置的 Bot 主人。

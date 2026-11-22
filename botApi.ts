@@ -226,10 +226,10 @@ export class BotApi {
      * @param emojiId - 表情 ID
      * @param set - true 添加 / false 移除
      */
-    async setMsgEmojiLike(messageId: number, emojiId: string, set?: boolean) {
+    async setMsgEmojiLike(messageId: number, emojiId: number, set?: boolean) {
         await this.napcat.set_msg_emoji_like({
             message_id: messageId,
-            emoji_id: emojiId,
+            emoji_id: String(emojiId),
             set,
         });
     }
@@ -239,10 +239,10 @@ export class BotApi {
      * @param messageId - 消息 ID
      * @param emojiId - 表情 ID
      */
-    async fetchEmojiLike(messageId: number, emojiId?: string) {
+    async fetchEmojiLike(messageId: number, emojiId?: number) {
         return await this.napcat.fetch_emoji_like({
             message_id: messageId,
-            emoji_id: emojiId,
+            emoji_id: emojiId != null ? String(emojiId) : undefined,
         } as any);
     }
 
@@ -407,10 +407,10 @@ export class BotApi {
     }
 
     /** 删除群公告 */
-    async deleteGroupNotice(groupId: number, noticeId: string) {
+    async deleteGroupNotice(groupId: number, noticeId: number) {
         await this.napcat._del_group_notice({
             group_id: groupId,
-            notice_id: noticeId,
+            notice_id: String(noticeId),
         } as any);
     }
 

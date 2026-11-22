@@ -7,6 +7,10 @@ description: HotCat Bot 的 Message 消息段构建器参考：提供 text、at�
 
 消息段构建器，用于构造发送内容。搭配 `bot.api.sendMessage()` / `bot.api.sendGroupMessage()` 等方法使用。
 
+::: tip ID 类型约定
+QQ 号、群号、消息号、表情 ID 统一使用 `number`；音乐 ID 等平台不透明 ID 仍为 `string`。
+:::
+
 ## 收发支持
 
 | 类型 | 发送 | 接收 | 说明 |
@@ -42,8 +46,9 @@ static text(text: string): Message
 
 ### Message.at(qq)
 ```ts
-static at(qq: string | number): Message
+static at(qq: number | 'all'): Message
 ```
+@某人，传 QQ 号；`'all'` 等同于 `atAll()`。
 
 ### Message.atAll()
 ```ts
@@ -53,7 +58,7 @@ static atAll(): Message
 
 ### Message.reply(id)
 ```ts
-static reply(id: string | number): Message
+static reply(id: number): Message
 ```
 引用回复，传消息 ID。
 
@@ -84,13 +89,13 @@ static file(file: string | Buffer, name?: string): Message
 
 ### Message.face(id)
 ```ts
-static face(id: string | number): Message
+static face(id: number): Message
 ```
 QQ 表情，传表情 ID。
 
 ### Message.mface(emoji_id, emoji_package_id, key, summary?)
 ```ts
-static mface(emoji_id: string | number, emoji_package_id: string | number, key: string, summary?: string): Message
+static mface(emoji_id: number, emoji_package_id: number, key: string, summary?: string): Message
 ```
 商城表情（仅发送）。
 
@@ -146,8 +151,8 @@ static forward(message_id: number): Message
 ### Message.node(id, user_id?, nickname?, ...)
 ```ts
 static node(
-    id: string | number,
-    user_id?: string | number,
+    id: number,
+    user_id?: number,
     nickname?: string,
     source?: string,
     news?: { text: string }[],
@@ -162,7 +167,7 @@ static node(
 ```ts
 static customNode(
     content: Message[],
-    user_id?: string | number,
+    user_id?: number,
     nickname?: string,
     ...
 ): Message
@@ -173,7 +178,7 @@ static customNode(
 
 ### Message.contact(type, id)
 ```ts
-static contact(type: 'qq' | 'group', id: string | number): Message
+static contact(type: 'qq' | 'group', id: number): Message
 ```
 推荐联系人/群（仅发送）。
 

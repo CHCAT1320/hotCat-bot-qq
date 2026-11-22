@@ -161,8 +161,8 @@ export class BotClient {
      * 判断指定 QQ 号是否为 bot 主人
      * @param qq - 待判断的 QQ 号
      */
-    isOwner(qq: number | string): boolean {
-        return Number(qq) === this.owner;
+    isOwner(qq: number): boolean {
+        return qq === this.owner;
     }
 
     /**
