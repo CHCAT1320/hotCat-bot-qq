@@ -45,6 +45,41 @@ export const colors = {
 const sanitize = (s: string): string =>
     s.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F\u200B-\u200F\u202A-\u202E\u2060\uFEFF]/g, '');
 
+const shortText = (s: string, max = 200): string => {
+    const oneLine = sanitize(s).replace(/\s+/g, ' ').trim();
+    return oneLine.length > max ? `${oneLine.slice(0, max - 3)}...` : oneLine;
+};
+
+/** 按 CQ 码顶层逗号拆分参数，忽略 JSON 对象/数组和引号内的逗号 */
+const splitCQParams = (params: string): Record<string, string> => {
+    const kv: Record<string, string> = {};
+    let start = 0;
+    let depth = 0;
+    let quote = '';
+    let escaped = false;
+
+    const push = (part: string) => {
+        const eq = part.indexOf('=');
+        if (eq > 0) kv[part.slice(0, eq)] = part.slice(eq + 1);
+    };
+
+    for (let i = 0; i <= params.length; i++) {
+        const c = params[i];
+        if (i < params.length) {
+            if (escaped) { escaped = false; continue; }
+            if (c === '\\') { escaped = true; continue; }
+            if (quote) { if (c === quote) quote = ''; continue; }
+            if (c === '"' || c === "'") { quote = c; continue; }
+            if (c === '{' || c === '[') { depth++; continue; }
+            if (c === '}' || c === ']') { depth--; continue; }
+            if (c !== ',' || depth !== 0) continue;
+        }
+        push(params.slice(start, i));
+        start = i + 1;
+    }
+    return kv;
+};
+
 /** 安全格式化未知异常，避免 JSON.stringify 遇到循环引用时再次抛错 */
 export const formatError = (e: unknown): string => {
     if (e instanceof Error) return e.message;
@@ -73,18 +108,21 @@ export const parseCQ = (raw: string): string => {
             const type = raw.slice(start, commaIdx);
             let depth = 1;
             let j = commaIdx + 1;
+            let quote = '';
+            let escaped = false;
             while (j < raw.length) {
-                if (raw[j] === '[') depth++;
-                else if (raw[j] === ']') { depth--; if (depth === 0) break; }
+                const c = raw[j];
+                if (escaped) { escaped = false; j++; continue; }
+                if (c === '\\') { escaped = true; j++; continue; }
+                if (quote) { if (c === quote) quote = ''; j++; continue; }
+                if (c === '"' || c === "'") { quote = c; j++; continue; }
+                if (c === '[') depth++;
+                else if (c === ']') { depth--; if (depth === 0) break; }
                 j++;
             }
             if (depth !== 0) { result += raw[i]; i++; continue; }
             const params = raw.slice(commaIdx + 1, j);
-            const kv: Record<string, string> = {};
-            params.split(',').forEach(p => {
-                const eq = p.indexOf('=');
-                if (eq > 0) kv[p.slice(0, eq)] = p.slice(eq + 1);
-            });
+            const kv = splitCQParams(params);
             switch (type) {
                 case 'image': result += kv.url ? `[图片:${sanitize(kv.url)}]` : '[图片]'; break;
                 case 'face': result += `[表情:${kv.id || '?'}]`; break;
@@ -95,7 +133,7 @@ export const parseCQ = (raw: string): string => {
                 case 'file': result += kv.url ? `[文件:${sanitize(kv.url)}]` : '[文件]'; break;
                 case 'dice': result += '[骰子]'; break;
                 case 'rps': result += '[猜拳]'; break;
-                case 'json': result += '[json]'; break;
+                case 'json': result += kv.data ? `[json:${shortText(kv.data)}]` : '[json]'; break;
                 case 'forward': result += '[转发]'; break;
                 case 'music': result += '[音乐]'; break;
                 case 'mface': result += '[商城表情]'; break;
@@ -147,8 +185,10 @@ export const formatMessage = (m: Message): string => {
             const short = f.length > 60 ? f.slice(0, 57) + '...' : f;
             return `${colors.brightCyan}[文件:${short}]${colors.reset}`;
         }
-        case 'json':
-            return `${colors.gray}[json]${colors.reset}`;
+        case 'json': {
+            const raw = shortText(String(m.data.data ?? ''));
+            return `${colors.gray}${raw ? `[json:${raw}]` : '[json]'}${colors.reset}`;
+        }
         case 'markdown':
             return `${colors.cyan}[markdown]${colors.reset}`;
         case 'music':
