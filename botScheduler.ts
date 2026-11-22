@@ -1,4 +1,5 @@
 import * as schedule from 'node-schedule';
+import { BotConsole, formatError } from './botConsole';
 
 type SchedulerJob = ReturnType<typeof schedule.scheduleJob>;
 
@@ -19,12 +20,19 @@ export class BotScheduler {
      * @param fn - 回调函数
      * @returns job id，可用于 cancel
      */
-    cron(expr: string, fn: () => void): number {
+    cron(expr: string, fn: () => void | Promise<void>): number {
         const id = ++this.idCounter;
-        const job = schedule.scheduleJob(expr, () => {
-            try { fn(); } catch {}
-        });
+        let job: SchedulerJob | null = null;
+        try {
+            job = schedule.scheduleJob(expr, () => {
+                this.run(fn);
+            });
+        } catch (e) {
+            new BotConsole('error', `cron 表达式无效: ${expr} (${formatError(e)})`).log();
+            return id;
+        }
         if (job) this.jobs.set(id, job);
+        else new BotConsole('error', `cron 表达式无效: ${expr}`).log();
         return id;
     }
 
@@ -34,11 +42,15 @@ export class BotScheduler {
      * @param fn - 回调函数
      * @returns job id
      */
-    every(time: number | string, fn: () => void): number {
+    every(time: number | string, fn: () => void | Promise<void>): number {
         const ms = typeof time === 'number' ? time : this.parseTime(time);
         const id = ++this.idCounter;
+        if (!Number.isFinite(ms) || ms <= 0) {
+            new BotConsole('error', `间隔时间无效: ${String(time)}`).log();
+            return id;
+        }
         const timer = setInterval(() => {
-            try { fn(); } catch {}
+            this.run(fn);
         }, ms);
         this.jobs.set(id, timer);
         return id;
@@ -50,28 +62,55 @@ export class BotScheduler {
      * @param fn - 回调函数
      * @returns job id
      */
-    at(time: string | Date, fn: () => void): number {
+    at(time: string | Date, fn: () => void | Promise<void>): number {
         const id = ++this.idCounter;
 
         if (typeof time === 'string' && time.includes('-')) {
             const target = new Date(time);
-            if (isNaN(target.getTime())) return id;
-            const ms = target.getTime() - Date.now();
-            if (ms <= 0) { try { fn(); } catch {} return id; }
-            const timer = setTimeout(() => { try { fn(); } catch {} }, ms);
-            this.jobs.set(id, timer);
-            return id;
+            if (isNaN(target.getTime())) {
+                new BotConsole('error', `时间格式无效: ${time}`).log();
+                return id;
+            }
+            return this.scheduleAt(id, target, fn);
         }
 
         if (typeof time === 'string') {
             return this.cron(this.timeToCron(time), fn);
         }
 
-        const ms = time.getTime() - Date.now();
-        if (ms <= 0) { try { fn(); } catch {} return id; }
-        const timer = setTimeout(() => { try { fn(); } catch {} }, ms);
-        this.jobs.set(id, timer);
+        return this.scheduleAt(id, time, fn);
+    }
+
+    private scheduleAt(id: number, target: Date, fn: () => void | Promise<void>): number {
+        if (target.getTime() - Date.now() <= 0) {
+            this.run(fn);
+            return id;
+        }
+        let job: SchedulerJob | null = null;
+        try {
+            job = schedule.scheduleJob(target, () => {
+                this.run(fn);
+            });
+        } catch (e) {
+            new BotConsole('error', `定时任务创建失败: ${formatError(e)}`).log();
+            return id;
+        }
+        if (job) this.jobs.set(id, job);
         return id;
+    }
+
+    private run(fn: () => void | Promise<void>): void {
+        const onError = (e: unknown) => {
+            new BotConsole('error', `定时任务执行失败: ${formatError(e)}`).log();
+        };
+        try {
+            const result = fn();
+            if (result && typeof (result as Promise<void>).catch === 'function') {
+                (result as Promise<void>).catch(onError);
+            }
+        } catch (e) {
+            onError(e);
+        }
     }
 
     /**
@@ -97,10 +136,12 @@ export class BotScheduler {
     }
 
     private parseTime(t: string): number {
-        const m = t.match(/^(\d+)\s*(s|sec|secs|second|seconds|m|min|mins|minute|minutes|h|hr|hrs|hour|hours|d|day|days)$/i);
+        const m = t.match(/^(\d+)\s*(ms|s|sec|secs|second|seconds|m|min|mins|minute|minutes|h|hr|hrs|hour|hours|d|day|days)$/i);
         if (!m) return 0;
         const v = parseInt(m[1]);
-        switch (m[2][0].toLowerCase()) {
+        const unit = m[2].toLowerCase();
+        if (unit === 'ms') return v;
+        switch (unit[0]) {
             case 's': return v * 1000;
             case 'm': return v * 60000;
             case 'h': return v * 3600000;

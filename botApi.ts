@@ -12,11 +12,25 @@ export class BotApi {
 
     constructor(config: NCWebsocketOptions, debug?: boolean) {
         this.napcat = new NCWebsocket(config, debug ?? false);
+        const rawSend = this.napcat.send.bind(this.napcat);
+        this.napcat.send = (async (method: any, params: any) => {
+            if (this._client && !this._client.online && method !== 'get_login_info') {
+                throw new Error('bot 当前离线（QQ 掉线或连接未建立），API 调用未执行');
+            }
+            return rawSend(method, params);
+        }) as typeof this.napcat.send;
     }
 
     /** 建立 WebSocket 连接 */
     async connect() {
         await this.napcat.connect();
+    }
+
+    /** 发送前检查 bot 是否在线，离线时抛出明确错误 */
+    private ensureOnline(): void {
+        if (this._client && !this._client.online) {
+            throw new Error('bot 当前离线（QQ 掉线或连接未建立），消息未发送');
+        }
     }
 
     /**
@@ -33,6 +47,7 @@ export class BotApi {
      * @param messages - 消息段
      */
     async sendMessage(target: { group_id: number } | { user_id: number }, ...messages: Message[]) {
+        this.ensureOnline();
         const type = 'group_id' in target ? 'sendGroupMessage' : 'sendPrivateMessage';
         new BotConsole(type, messages).log();
         await this.napcat.send_msg({
@@ -47,6 +62,7 @@ export class BotApi {
      * @param messages - 消息段
      */
     async sendGroupMessage(groupId: number, ...messages: Message[]) {
+        this.ensureOnline();
         new BotConsole('sendGroupMessage', messages).log();
         await this.napcat.send_group_msg({
             group_id: groupId,
@@ -60,6 +76,7 @@ export class BotApi {
      * @param messages - 消息段
      */
     async sendPrivateMessage(userId: number, ...messages: Message[]) {
+        this.ensureOnline();
         new BotConsole('sendPrivateMessage', messages).log();
         await this.napcat.send_private_msg({
             user_id: userId,
@@ -73,6 +90,7 @@ export class BotApi {
      * @param nodes - 转发节点，由 `Message.node()` / `Message.customNode()` 构建
      */
     async sendForwardMsg(target: { group_id: number } | { user_id: number }, nodes: Message[]) {
+        this.ensureOnline();
         await this.napcat.send_forward_msg({
             ...target,
             message: nodes.map(n => n.toJson()) as any[],
@@ -85,6 +103,7 @@ export class BotApi {
      * @param nodes - 转发节点
      */
     async sendGroupForwardMsg(groupId: number, nodes: Message[]) {
+        this.ensureOnline();
         await this.napcat.send_group_forward_msg({
             group_id: groupId,
             message: nodes.map(n => n.toJson()) as any[],
@@ -97,6 +116,7 @@ export class BotApi {
      * @param nodes - 转发节点
      */
     async sendPrivateForwardMsg(userId: number, nodes: Message[]) {
+        this.ensureOnline();
         await this.napcat.send_private_forward_msg({
             user_id: userId,
             message: nodes.map(n => n.toJson()) as any[],

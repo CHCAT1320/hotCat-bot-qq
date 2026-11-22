@@ -7,7 +7,6 @@ const config = {
     owner: 1095216448, // 管理员（主人）QQ 号
     reconnection: {
         enable: true,
-        attempts: 10,
         delay: 5000,
     },
 };

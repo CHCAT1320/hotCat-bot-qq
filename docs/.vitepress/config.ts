@@ -77,6 +77,7 @@ export default defineConfig({
             { text: '首页', link: '/' },
             { text: '快速开始', link: '/guide/getting-started' },
             { text: 'API', link: '/api/' },
+            { text: '友链', link: '/links' },
         ],
         sidebar: [
             {

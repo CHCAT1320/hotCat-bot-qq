@@ -45,6 +45,17 @@ export const colors = {
 const sanitize = (s: string): string =>
     s.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F\u200B-\u200F\u202A-\u202E\u2060\uFEFF]/g, '');
 
+/** 安全格式化未知异常，避免 JSON.stringify 遇到循环引用时再次抛错 */
+export const formatError = (e: unknown): string => {
+    if (e instanceof Error) return e.message;
+    if (typeof e === 'string') return e;
+    try {
+        return JSON.stringify(e);
+    } catch {
+        return String(e);
+    }
+};
+
 /**
  * 解析 CQ 码字符串为可读中文
  * @example

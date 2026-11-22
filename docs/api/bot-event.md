@@ -654,6 +654,6 @@ onProfileLike(fn: (bot: BotClient, event: NotifyProfileLike) => any): void
 ```ts
 onBotOffline(fn: (bot: BotClient, event: BotOffline) => any): void
 ```
-bot 离线。`event.tag` 和 `event.message` 包含离线原因。
+bot 离线。`event.tag` 和 `event.message` 包含离线原因。框架默认会输出掉线提醒并将 `bot.online` 置为 `false`；恢复在线后自动置为 `true`。
 
 > 每个 `onXxx(fn)` 都有对应的 `offXxx(fn)`。

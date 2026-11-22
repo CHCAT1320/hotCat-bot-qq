@@ -1,7 +1,7 @@
 import type { BotApi } from './botApi'
 import type { BotClient } from './botClient'
 import { PluginBase, PluginConstructor, PluginMeta } from './plugin'
-import { BotConsole } from './botConsole'
+import { BotConsole, formatError } from './botConsole'
 import * as fs from 'fs'
 import * as path from 'path'
 import { pathToFileURL } from 'url'
@@ -30,6 +30,7 @@ export class BotPluginSystem {
     private watcher: ReturnType<typeof setInterval> | null = null
     private watchDir: string | null = null
     private watched = new Set<string>()
+    private watchBusy = false
 
     constructor(api: BotApi, client: BotClient) {
         this.api = api
@@ -124,7 +125,14 @@ export class BotPluginSystem {
         const loaded: string[] = []
         if (!fs.existsSync(dir)) return loaded
 
-        const entries = fs.readdirSync(dir, { withFileTypes: true })
+        let entries: fs.Dirent[]
+        try {
+            entries = fs.readdirSync(dir, { withFileTypes: true })
+        } catch (e) {
+            new BotConsole('error', `扫描插件目录 "${dir}" 失败: ${formatError(e)}`).log()
+            return loaded
+        }
+
         for (const entry of entries) {
             if (!entry.isDirectory()) continue
             const name = entry.name
@@ -150,7 +158,7 @@ export class BotPluginSystem {
                     loaded.push(name)
                 }
             } catch (e: any) {
-                new BotConsole('error', `加载插件 "${name}" 失败: ${e.message || e}`).log()
+                new BotConsole('error', `加载插件 "${name}" 失败: ${formatError(e)}`).log()
             }
         }
         return loaded
@@ -175,36 +183,45 @@ export class BotPluginSystem {
         new BotConsole('plugin', { name: 'watch', msg: `开始监听 ${this.watchDir}` }).log()
 
         this.watcher = setInterval(async () => {
-            if (!fs.existsSync(this.watchDir!)) return
-            const entries = fs.readdirSync(this.watchDir!, { withFileTypes: true })
-            const current = new Set<string>()
+            if (this.watchBusy) return
+            this.watchBusy = true
+            try {
+                const watchDir = this.watchDir
+                if (!watchDir || !fs.existsSync(watchDir)) return
+                const entries = fs.readdirSync(watchDir, { withFileTypes: true })
+                const current = new Set<string>()
 
-            for (const entry of entries) {
-                if (!entry.isDirectory()) continue
-                const name = entry.name
-                const indexPath = this.findIndex(this.watchDir!, name)
-                if (!indexPath) continue
-                current.add(name)
+                for (const entry of entries) {
+                    if (!entry.isDirectory()) continue
+                    const name = entry.name
+                    const indexPath = this.findIndex(watchDir, name)
+                    if (!indexPath) continue
+                    current.add(name)
 
-                if (!this.watched.has(name)) {
-                    await this.scanOne(this.watchDir!, name)
+                    if (!this.watched.has(name)) {
+                        await this.scanOne(watchDir, name)
+                    }
                 }
-            }
 
-            for (const name of Array.from(this.watched)) {
-                if (!current.has(name) && this.registry.has(name)) {
-                    const displayName = this.registry.get(name)?.meta.name || name
-                    try {
-                        if (this.instances.has(name)) {
-                            await this.unload(name)
-                        }
-                        this.registry.delete(name)
-                        new BotConsole('plugin', { name: displayName, msg: '目录已删除，已移除' }).log()
-                    } catch {}
+                for (const name of Array.from(this.watched)) {
+                    if (!current.has(name) && this.registry.has(name)) {
+                        const displayName = this.registry.get(name)?.meta.name || name
+                        try {
+                            if (this.instances.has(name)) {
+                                await this.unload(name)
+                            }
+                            this.registry.delete(name)
+                            new BotConsole('plugin', { name: displayName, msg: '目录已删除，已移除' }).log()
+                        } catch {}
+                    }
                 }
-            }
 
-            this.watched = current
+                this.watched = current
+            } catch (e) {
+                new BotConsole('error', `插件目录监听失败: ${formatError(e)}`).log()
+            } finally {
+                this.watchBusy = false
+            }
         }, interval)
     }
 
@@ -214,6 +231,7 @@ export class BotPluginSystem {
             clearInterval(this.watcher)
             this.watcher = null
             this.watchDir = null
+            this.watchBusy = false
             new BotConsole('plugin', { name: 'watch', msg: '已停止' }).log()
         }
     }
@@ -233,7 +251,7 @@ export class BotPluginSystem {
             await this.load(name)
             new BotConsole('plugin', { name: meta.name, msg: '已自动加载' }).log()
         } catch (e: any) {
-            new BotConsole('error', `自动加载插件 "${name}" 失败: ${e.message || e}`).log()
+            new BotConsole('error', `自动加载插件 "${name}" 失败: ${formatError(e)}`).log()
         }
     }
 }

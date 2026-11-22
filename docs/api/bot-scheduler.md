@@ -7,12 +7,14 @@ description: HotCat Bot 的 BotScheduler 定时任务调度器参考：通过 bo
 
 定时任务调度器，通过 `bot.scheduler` 访问。支持 cron 表达式、间隔时间、指定时间三种模式。
 
+支持异步回调；回调抛出的同步异常和 Promise 拒绝都会被捕获并通过控制台输出，不会导致进程退出。
+
 ## 方法
 
 ### cron(expr, fn)
 
 ```ts
-cron(expr: string, fn: () => void): number
+cron(expr: string, fn: () => void | Promise<void>): number
 ```
 
 标准 cron 表达式定时，返回 job id 可用于取消。
@@ -39,18 +41,20 @@ bot.scheduler.cron('*/30 * * * *', () => {
 ### every(time, fn)
 
 ```ts
-every(time: number | string, fn: () => void): number
+every(time: number | string, fn: () => void | Promise<void>): number
 ```
 
 固定间隔重复执行。支持数字（毫秒）或可读字符串。
 
 | 格式 | 示例 | 含义 |
 |---|---|---|
-| 毫秒 | `60000` | 60 秒 |
+| 毫秒 | `60000` `'500ms'` | 60 秒 / 500 毫秒 |
 | 秒 | `'30s'` `'30sec'` `'30second'` | 30 秒 |
 | 分钟 | `'5m'` `'5min'` `'5minute'` | 5 分钟 |
 | 小时 | `'1h'` `'1hr'` `'1hour'` | 1 小时 |
 | 天 | `'2d'` `'2day'` | 2 天 |
+
+间隔无效时不会创建任务，并输出错误日志。
 
 ```ts
 // 每 30 秒执行
@@ -69,7 +73,7 @@ bot.scheduler.every(60000, () => { ... })
 ### at(time, fn)
 
 ```ts
-at(time: string | Date, fn: () => void): number
+at(time: string | Date, fn: () => void | Promise<void>): number
 ```
 
 指定时间执行。`'08:00'` 格式为每日重复，`'YYYY-MM-DD HH:mm'` 或 `Date` 为一次性。

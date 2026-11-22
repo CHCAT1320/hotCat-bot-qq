@@ -21,7 +21,7 @@ new BotClient(config: BotConfig)
 | `accessToken` | `string` | 否 | 访问令牌 |
 | `owner` | `number` | 是 | Bot 主人（管理员）QQ 号，未配置会抛出错误并拒绝启动 |
 | `reconnection.enable` | `boolean` | 否 | 是否自动重连，默认 true |
-| `reconnection.attempts` | `number` | 否 | 重连次数，默认 10 |
+| `reconnection.attempts` | `number` | 否 | 最大重连次数，默认 `Infinity`（一直重试） |
 | `reconnection.delay` | `number` | 否 | 重连间隔(ms)，默认 5000 |
 | `apiTimeout` | `number` | 否 | API 超时(ms)，默认 120000 |
 
@@ -35,6 +35,7 @@ new BotClient(config: BotConfig)
 | `nickname` | `string \| null` | 登录后 bot 昵称，启动前为 null |
 | `id` | `number \| null` | 登录后 bot QQ 号，启动前为 null |
 | `owner` | `number` | 配置的 Bot 主人（管理员）QQ 号 |
+| `online` | `boolean` | bot QQ 是否在线，掉线 / 恢复时自动更新 |
 
 ## 方法
 
@@ -53,6 +54,10 @@ async start(): Promise<void>
 ```
 
 连接 napcat 并初始化。启动成功后自动填充 `nickname` 和 `id`。
+
+连接建立、断开、重连失败均会通过控制台输出提醒；默认断线后会一直按 `reconnection.delay` 间隔重试。若需限制次数，可设置 `reconnection.attempts`。
+
+框架同时监听 `notice.bot_offline`、`meta_event.lifecycle` 和心跳状态：bot QQ 掉线或恢复在线时会输出提醒并更新 `bot.online`。QQ 账号本身掉线后需要在 NapCat / QQ 端重新登录，框架不会自动重新登录账号。
 
 ## 使用示例
 

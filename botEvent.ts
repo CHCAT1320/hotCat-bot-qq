@@ -1,5 +1,5 @@
 import { GroupMessage, GroupMessageSelf, PrivateFriendMessageSelf, PrivateGroupMessageSelf, NCWebsocket, RequestFriend, RequestGroupAdd, RequestGroupInvite, FriendAdd, FriendRecall, GroupAdminSet, GroupAdminUnset, GroupBanBan, GroupBanLiftBan, GroupCard, GroupDecreaseLeave, GroupDecreaseKick, GroupDecreaseKickMe, GroupIncreaseApprove, GroupIncreaseInvite, GroupRecall, GroupUpload, GroupMsgEmojiLike, GroupEssenceAdd, GroupEssenceDelete, BotOffline, NotifyPokeFriend, NotifyPokeGroup, NotifyGroupName, NotifyTitle, NotifyProfileLike } from 'node-napcat-ts';
-import { BotConsole, PrivateMessage, PrivateMessageSelf, RequestGroup, NoticeEvent as NoticeEventType } from './botConsole';
+import { BotConsole, PrivateMessage, PrivateMessageSelf, RequestGroup, NoticeEvent as NoticeEventType, formatError } from './botConsole';
 import type { BotClient } from './botClient';
 import type { BotApi } from './botApi';
 
@@ -27,7 +27,7 @@ export class MessageEvent {
             try {
                 await fn(this.client, event);
             } catch (e) {
-                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+                new BotConsole('error', formatError(e)).log();
             }
         };
         this.wrappers.set(fn, w);
@@ -47,7 +47,7 @@ export class MessageEvent {
             try {
                 await fn(this.client, event);
             } catch (e) {
-                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+                new BotConsole('error', formatError(e)).log();
             }
         };
         this.wrappers.set(fn, w);
@@ -67,7 +67,7 @@ export class MessageEvent {
             try {
                 await fn(this.client, event);
             } catch (e) {
-                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+                new BotConsole('error', formatError(e)).log();
             }
         };
         this.wrappers.set(fn, w);
@@ -87,7 +87,7 @@ export class MessageEvent {
             try {
                 await fn(this.client, event);
             } catch (e) {
-                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+                new BotConsole('error', formatError(e)).log();
             }
         };
         this.wrappers.set(fn, w);
@@ -107,7 +107,7 @@ export class MessageEvent {
             try {
                 await fn(this.client, event);
             } catch (e) {
-                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+                new BotConsole('error', formatError(e)).log();
             }
         };
         this.wrappers.set(fn, w);
@@ -147,7 +147,7 @@ export class MessageSent {
             try {
                 await fn(this.client, event);
             } catch (e) {
-                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+                new BotConsole('error', formatError(e)).log();
             }
         };
         this.wrappers.set(fn, w);
@@ -167,7 +167,7 @@ export class MessageSent {
             try {
                 await fn(this.client, event);
             } catch (e) {
-                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+                new BotConsole('error', formatError(e)).log();
             }
         };
         this.wrappers.set(fn, w);
@@ -187,7 +187,7 @@ export class MessageSent {
             try {
                 await fn(this.client, event);
             } catch (e) {
-                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+                new BotConsole('error', formatError(e)).log();
             }
         };
         this.wrappers.set(fn, w);
@@ -207,7 +207,7 @@ export class MessageSent {
             try {
                 await fn(this.client, event);
             } catch (e) {
-                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+                new BotConsole('error', formatError(e)).log();
             }
         };
         this.wrappers.set(fn, w);
@@ -227,7 +227,7 @@ export class MessageSent {
             try {
                 await fn(this.client, event);
             } catch (e) {
-                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+                new BotConsole('error', formatError(e)).log();
             }
         };
         this.wrappers.set(fn, w);
@@ -270,7 +270,7 @@ export class RequestEvent {
             try {
                 await fn(this.client, event);
             } catch (e) {
-                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+                new BotConsole('error', formatError(e)).log();
             }
         };
         this.wrappers.set(fn, w);
@@ -290,7 +290,7 @@ export class RequestEvent {
             try {
                 await fn(this.client, event);
             } catch (e) {
-                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+                new BotConsole('error', formatError(e)).log();
             }
         };
         this.wrappers.set(fn, w);
@@ -310,7 +310,7 @@ export class RequestEvent {
             try {
                 await fn(this.client, event);
             } catch (e) {
-                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+                new BotConsole('error', formatError(e)).log();
             }
         };
         this.wrappers.set(fn, w);
@@ -330,7 +330,7 @@ export class RequestEvent {
             try {
                 await fn(this.client, event);
             } catch (e) {
-                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+                new BotConsole('error', formatError(e)).log();
             }
         };
         this.wrappers.set(fn, w);
@@ -375,7 +375,6 @@ export class NoticeEvent {
         this.napcat.on('notice.notify.group_name', log);
         this.napcat.on('notice.notify.title', log);
         this.napcat.on('notice.notify.profile_like', log);
-        this.napcat.on('notice.bot_offline', log);
     }
 
     onFriendAdd(fn: (bot: BotClient, event: FriendAdd) => any): void {
@@ -383,7 +382,7 @@ export class NoticeEvent {
             try {
                 await fn(this.client, event);
             } catch (e) {
-                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+                new BotConsole('error', formatError(e)).log();
             }
         };
         this.wrappers.set(fn, w);
@@ -403,7 +402,7 @@ export class NoticeEvent {
             try {
                 await fn(this.client, event);
             } catch (e) {
-                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+                new BotConsole('error', formatError(e)).log();
             }
         };
         this.wrappers.set(fn, w);
@@ -423,7 +422,7 @@ export class NoticeEvent {
             try {
                 await fn(this.client, event);
             } catch (e) {
-                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+                new BotConsole('error', formatError(e)).log();
             }
         };
         this.wrappers.set(fn, w);
@@ -443,7 +442,7 @@ export class NoticeEvent {
             try {
                 await fn(this.client, event);
             } catch (e) {
-                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+                new BotConsole('error', formatError(e)).log();
             }
         };
         this.wrappers.set(fn, w);
@@ -463,7 +462,7 @@ export class NoticeEvent {
             try {
                 await fn(this.client, event);
             } catch (e) {
-                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+                new BotConsole('error', formatError(e)).log();
             }
         };
         this.wrappers.set(fn, w);
@@ -483,7 +482,7 @@ export class NoticeEvent {
             try {
                 await fn(this.client, event);
             } catch (e) {
-                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+                new BotConsole('error', formatError(e)).log();
             }
         };
         this.wrappers.set(fn, w);
@@ -503,7 +502,7 @@ export class NoticeEvent {
             try {
                 await fn(this.client, event);
             } catch (e) {
-                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+                new BotConsole('error', formatError(e)).log();
             }
         };
         this.wrappers.set(fn, w);
@@ -523,7 +522,7 @@ export class NoticeEvent {
             try {
                 await fn(this.client, event);
             } catch (e) {
-                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+                new BotConsole('error', formatError(e)).log();
             }
         };
         this.wrappers.set(fn, w);
@@ -543,7 +542,7 @@ export class NoticeEvent {
             try {
                 await fn(this.client, event);
             } catch (e) {
-                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+                new BotConsole('error', formatError(e)).log();
             }
         };
         this.wrappers.set(fn, w);
@@ -563,7 +562,7 @@ export class NoticeEvent {
             try {
                 await fn(this.client, event);
             } catch (e) {
-                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+                new BotConsole('error', formatError(e)).log();
             }
         };
         this.wrappers.set(fn, w);
@@ -583,7 +582,7 @@ export class NoticeEvent {
             try {
                 await fn(this.client, event);
             } catch (e) {
-                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+                new BotConsole('error', formatError(e)).log();
             }
         };
         this.wrappers.set(fn, w);
@@ -603,7 +602,7 @@ export class NoticeEvent {
             try {
                 await fn(this.client, event);
             } catch (e) {
-                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+                new BotConsole('error', formatError(e)).log();
             }
         };
         this.wrappers.set(fn, w);
@@ -623,7 +622,7 @@ export class NoticeEvent {
             try {
                 await fn(this.client, event);
             } catch (e) {
-                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+                new BotConsole('error', formatError(e)).log();
             }
         };
         this.wrappers.set(fn, w);
@@ -643,7 +642,7 @@ export class NoticeEvent {
             try {
                 await fn(this.client, event);
             } catch (e) {
-                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+                new BotConsole('error', formatError(e)).log();
             }
         };
         this.wrappers.set(fn, w);
@@ -663,7 +662,7 @@ export class NoticeEvent {
             try {
                 await fn(this.client, event);
             } catch (e) {
-                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+                new BotConsole('error', formatError(e)).log();
             }
         };
         this.wrappers.set(fn, w);
@@ -683,7 +682,7 @@ export class NoticeEvent {
             try {
                 await fn(this.client, event);
             } catch (e) {
-                new BotConsole('error', e instanceof Error ? e.message : JSON.stringify(e)).log();
+                new BotConsole('error', formatError(e)).log();
             }
         };
         this.wrappers.set(fn, w);

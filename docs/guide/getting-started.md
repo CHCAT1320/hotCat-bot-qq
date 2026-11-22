@@ -40,7 +40,7 @@ const bot = new BotClient({
     owner: 123456789,
     reconnection: {
         enable: true,
-        attempts: 10,
+        attempts: Infinity, // 一直重试
         delay: 5000,
     },
 })

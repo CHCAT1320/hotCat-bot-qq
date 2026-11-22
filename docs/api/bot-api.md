@@ -9,6 +9,8 @@ description: HotCat Bot 的 BotApi 完整方法参考：统一封装 NapCat / On
 
 ## 消息发送
 
+所有 API 调用都会在发起前检查 `bot.online`；bot 离线（QQ 掉线或 WebSocket 未连接）时直接抛出 `bot 当前离线（QQ 掉线或连接未建立），API 调用未执行`，不会实际请求 NapCat。事件监听与定时任务中的异常会被框架捕获并输出到控制台；在普通代码中直接调用时，请自行 `try/catch`。`getLoginInfo()` 在登录前也可调用。
+
 ### sendMessage(target, ...messages)
 ```ts
 async sendMessage(
