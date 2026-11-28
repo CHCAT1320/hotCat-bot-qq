@@ -170,20 +170,83 @@ export const parseCQ = (raw: string): string => {
             const params = raw.slice(commaIdx + 1, j);
             const kv = splitCQParams(params);
             switch (type) {
-                case 'image': result += kv.url ? `[图片:${sanitize(kv.url)}]` : '[图片]'; break;
+                case 'image': {
+                    const f = kv.url || kv.file || kv.summary || '';
+                    result += f ? `[图片:${sanitize(f)}]` : '[图片]';
+                    break;
+                }
                 case 'face': result += `[表情:${kv.id || '?'}]`; break;
                 case 'at': result += kv.qq === 'all' ? '[@全体]' : `[@${kv.qq || '?'}]`; break;
-                case 'record': result += kv.url ? `[语音:${sanitize(kv.url)}]` : '[语音]'; break;
-                case 'video': result += kv.url ? `[视频:${sanitize(kv.url)}]` : '[视频]'; break;
-                case 'reply': result += '[回复]'; break;
-                case 'file': result += kv.url ? `[文件:${sanitize(kv.url)}]` : '[文件]'; break;
-                case 'dice': result += '[骰子]'; break;
-                case 'rps': result += '[猜拳]'; break;
+                case 'record': {
+                    const f = kv.url || kv.file || '';
+                    result += f ? `[语音:${sanitize(f)}]` : '[语音]';
+                    break;
+                }
+                case 'video': {
+                    const f = kv.url || kv.file || '';
+                    result += f ? `[视频:${sanitize(f)}]` : '[视频]';
+                    break;
+                }
+                case 'reply': result += kv.id ? `[回复:${sanitize(kv.id)}]` : '[回复]'; break;
+                case 'file': {
+                    const f = kv.name || kv.file || kv.url || '';
+                    result += f ? `[文件:${sanitize(f)}]` : '[文件]';
+                    break;
+                }
+                case 'dice': result += kv.result ? `[骰子:${sanitize(kv.result)}]` : '[骰子]'; break;
+                case 'rps': result += kv.result ? `[猜拳:${sanitize(kv.result)}]` : '[猜拳]'; break;
                 case 'json': result += kv.data ? `[json:${shortText(kv.data)}]` : '[json]'; break;
-                case 'forward': result += '[转发]'; break;
-                case 'music': result += '[音乐]'; break;
-                case 'mface': result += '[商城表情]'; break;
-                case 'markdown': result += '[markdown]'; break;
+                case 'forward': result += kv.id ? `[转发:${sanitize(kv.id)}]` : '[转发]'; break;
+                case 'node': {
+                    const id = kv.id || kv.user_id || kv.nickname || '';
+                    result += id ? `[转发节点:${sanitize(id)}]` : '[转发节点]';
+                    break;
+                }
+                case 'music': {
+                    const parts = [kv.type, kv.id, kv.url].filter(Boolean);
+                    result += parts.length ? `[音乐:${parts.map((p) => sanitize(p)).join(':')}]` : '[音乐]';
+                    break;
+                }
+                case 'mface': {
+                    const parts = [kv.emoji_id, kv.summary].filter(Boolean);
+                    result += parts.length ? `[商城表情:${parts.map((p) => sanitize(p)).join(':')}]` : '[商城表情]';
+                    break;
+                }
+                case 'markdown': {
+                    const content = shortText(kv.content || kv.data || '');
+                    result += content ? `[markdown:${content}]` : '[markdown]';
+                    break;
+                }
+                case 'contact': {
+                    const parts = [kv.type, kv.id].filter(Boolean);
+                    result += parts.length ? `[推荐:${parts.map((p) => sanitize(p)).join('/')}]` : '[推荐]';
+                    break;
+                }
+                case 'share': {
+                    const parts = [kv.title, kv.url].filter(Boolean);
+                    result += parts.length ? `[链接:${parts.map((p) => sanitize(p)).join(' ')}]` : '[链接]';
+                    break;
+                }
+                case 'location': {
+                    const parts = [kv.title, kv.lat && kv.lon ? `${kv.lat},${kv.lon}` : ''].filter(Boolean);
+                    result += `[位置:${parts.length ? parts.map((p) => sanitize(String(p))).join(' ') : '?'}]`;
+                    break;
+                }
+                case 'xml': result += kv.data ? `[xml:${shortText(kv.data)}]` : '[xml]'; break;
+                case 'light_app': {
+                    const app = kv.app_name || kv.app || '';
+                    result += app ? `[小程序:${sanitize(app)}]` : '[小程序]';
+                    break;
+                }
+                case 'tts': result += kv.text ? `[语音:${sanitize(kv.text)}]` : '[语音]'; break;
+                case 'poke': result += kv.id ? `[戳一戳:${sanitize(kv.id)}]` : '[戳一戳]'; break;
+                case 'anonymous': {
+                    const name = kv.name || kv.flag || '';
+                    result += name ? `[匿名:${sanitize(name)}]` : '[匿名]';
+                    break;
+                }
+                case 'shake': result += '[窗口抖动]'; break;
+                case 'keyboard': result += '[按钮]'; break;
                 default: result += `[${type}]`; break;
             }
             i = j + 1;
@@ -193,6 +256,15 @@ export const parseCQ = (raw: string): string => {
         }
     }
     return result;
+};
+
+const clean = (v: unknown): string => sanitize(String(v ?? ''));
+const pick = (...values: unknown[]): string => {
+    for (const value of values) {
+        const text = clean(value);
+        if (text) return text;
+    }
+    return '';
 };
 
 /**
@@ -207,49 +279,113 @@ export const formatMessage = (m: Message): string => {
             return m.data.qq === 'all'
                 ? `${colors.blue}@全体成员${colors.reset}`
                 : `${colors.blue}@${sanitize(String(m.data.qq))}${colors.reset}`;
-        case 'reply':
-            return `${colors.gray}[回复]${colors.reset}`;
+        case 'reply': {
+            const id = clean(m.data.id);
+            return `${colors.gray}${id ? `[回复:${id}]` : '[回复]'}${colors.reset}`;
+        }
         case 'image': {
-            const f = sanitize(String(m.data.file || ''));
-            return `${colors.magenta}[图片:${f}]${colors.reset}`;
+            const f = pick(m.data.url, m.data.file, m.data.summary);
+            return `${colors.magenta}${f ? `[图片:${f}]` : '[图片]'}${colors.reset}`;
         }
         case 'face':
-            return `${colors.yellow}[表情:${m.data.id}]${colors.reset}`;
+            return `${colors.yellow}[表情:${clean(m.data.id) || '?'}]${colors.reset}`;
         case 'record': {
-            const f = sanitize(String(m.data.file || ''));
-            return `${colors.brightYellow}[语音:${f}]${colors.reset}`;
+            const f = pick(m.data.url, m.data.file);
+            return `${colors.brightYellow}${f ? `[语音:${f}]` : '[语音]'}${colors.reset}`;
         }
         case 'video': {
-            const f = sanitize(String(m.data.file || ''));
-            return `${colors.brightMagenta}[视频:${f}]${colors.reset}`;
+            const f = pick(m.data.url, m.data.file);
+            return `${colors.brightMagenta}${f ? `[视频:${f}]` : '[视频]'}${colors.reset}`;
         }
         case 'file': {
-            const f = sanitize(String(m.data.name || m.data.file || ''));
-            return `${colors.brightCyan}[文件:${f}]${colors.reset}`;
+            const f = pick(m.data.name, m.data.file, m.data.url);
+            return `${colors.brightCyan}${f ? `[文件:${f}]` : '[文件]'}${colors.reset}`;
         }
         case 'json': {
             const raw = shortText(String(m.data.data ?? ''));
             return `${colors.gray}${raw ? `[json:${raw}]` : '[json]'}${colors.reset}`;
         }
-        case 'markdown':
-            return `${colors.cyan}[markdown]${colors.reset}`;
-        case 'music':
-            return `${colors.magenta}[音乐]${colors.reset}`;
-        case 'dice':
-            return `${colors.yellow}[骰子]${colors.reset}`;
-        case 'rps':
-            return `${colors.yellow}[猜拳]${colors.reset}`;
-        case 'node':
-            return `${colors.cyan}[转发节点]${colors.reset}`;
-        case 'forward':
-            return `${colors.cyan}[转发:${sanitize(String(m.data.id))}]${colors.reset}`;
-        case 'contact':
-            return `${colors.blue}[推荐:${sanitize(String(m.data.type))}/${sanitize(String(m.data.id))}]${colors.reset}`;
-        case 'mface':
-            return `${colors.yellow}[商城表情]${colors.reset}`;
+        case 'markdown': {
+            const content = shortText(String(m.data.content ?? m.data.data ?? ''));
+            return `${colors.cyan}${content ? `[markdown:${content}]` : '[markdown]'}${colors.reset}`;
+        }
+        case 'music': {
+            const parts = [clean(m.data.type), clean(m.data.id), clean(m.data.url)].filter(Boolean);
+            return `${colors.magenta}${parts.length ? `[音乐:${parts.join(':')}]` : '[音乐]'}${colors.reset}`;
+        }
+        case 'dice': {
+            const result = clean(m.data.result);
+            return `${colors.yellow}${result ? `[骰子:${result}]` : '[骰子]'}${colors.reset}`;
+        }
+        case 'rps': {
+            const result = clean(m.data.result);
+            return `${colors.yellow}${result ? `[猜拳:${result}]` : '[猜拳]'}${colors.reset}`;
+        }
+        case 'node': {
+            const id = pick(m.data.id, m.data.nickname, m.data.user_id);
+            return `${colors.cyan}${id ? `[转发节点:${id}]` : '[转发节点]'}${colors.reset}`;
+        }
+        case 'forward': {
+            const id = clean(m.data.id);
+            return `${colors.cyan}${id ? `[转发:${id}]` : '[转发]'}${colors.reset}`;
+        }
+        case 'contact': {
+            const type = clean(m.data.type);
+            const id = clean(m.data.id);
+            return `${colors.blue}${type || id ? `[推荐:${type}/${id}]` : '[推荐]'}${colors.reset}`;
+        }
+        case 'mface': {
+            const id = clean(m.data.emoji_id);
+            const summary = clean(m.data.summary);
+            return `${colors.yellow}${id || summary ? `[商城表情:${[id, summary].filter(Boolean).join(':')}]` : '[商城表情]'}${colors.reset}`;
+        }
+        case 'share': {
+            const title = clean(m.data.title);
+            const url = clean(m.data.url);
+            return `${colors.blue}${title || url ? `[链接:${[title, url].filter(Boolean).join(' ')}]` : '[链接]'}${colors.reset}`;
+        }
+        case 'location': {
+            const title = clean(m.data.title);
+            const lat = clean(m.data.lat);
+            const lon = clean(m.data.lon);
+            return `${colors.blue}[位置:${[title, lat && lon ? `${lat},${lon}` : ''].filter(Boolean).join(' ') || '?'}]${colors.reset}`;
+        }
+        case 'xml': {
+            const data = shortText(String(m.data.data ?? m.data.xml ?? ''));
+            return `${colors.gray}${data ? `[xml:${data}]` : '[xml]'}${colors.reset}`;
+        }
+        case 'light_app': {
+            const app = pick(m.data.app_name, m.data.app);
+            return `${colors.cyan}${app ? `[小程序:${app}]` : '[小程序]'}${colors.reset}`;
+        }
+        case 'keyboard': {
+            return `${colors.cyan}[按钮]${colors.reset}`;
+        }
+        case 'tts': {
+            const text = clean(m.data.text);
+            return `${colors.brightYellow}${text ? `[语音:${text}]` : '[语音]'}${colors.reset}`;
+        }
+        case 'poke': {
+            const id = clean(m.data.id);
+            return `${colors.yellow}${id ? `[戳一戳:${id}]` : '[戳一戳]'}${colors.reset}`;
+        }
+        case 'anonymous': {
+            const name = pick(m.data.name, m.data.flag);
+            return `${colors.gray}${name ? `[匿名:${name}]` : '[匿名]'}${colors.reset}`;
+        }
+        case 'shake':
+            return `${colors.yellow}[窗口抖动]${colors.reset}`;
         default:
             return `[${m.type}]`;
     }
+};
+
+/** 优先使用完整消息段格式化，缺失时回退到 raw_message CQ 解析 */
+const formatSegments = (segments: Array<{ type: string; data: Record<string, any> }> | undefined, raw: string): string => {
+    if (Array.isArray(segments) && segments.length > 0) {
+        return segments.map((segment) => formatMessage(segment as unknown as Message)).join('');
+    }
+    return parseCQ(sanitize(raw));
 };
 
 /**
@@ -297,7 +433,7 @@ export class BotConsole {
                 `${colors.yellow}群${colors.reset}(${colors.cyan}${event.group_id}${colors.reset}) ` +
                 `${colors.red}${roleText}${colors.reset} ` +
                 `${colors.magenta}${sender}${colors.reset}(${colors.blue}${event.user_id}${colors.reset}): ` +
-                `${colors.green}${parseCQ(sanitize(event.raw_message))}${colors.reset}`
+                `${formatSegments(event.message as any, event.raw_message)}`
             );
         } else if (this.type === 'privateMessage') {
             const event = this.content as PrivateMessage;
@@ -307,7 +443,7 @@ export class BotConsole {
                 `${colors.yellow}[privateMessage]:${colors.reset} ` +
                 `${colors.cyan}[${tag}]${colors.reset} ` +
                 `${colors.magenta}${sender}${colors.reset}(${colors.blue}${event.user_id}${colors.reset}): ` +
-                `${colors.green}${parseCQ(sanitize(event.raw_message))}${colors.reset}`
+                `${formatSegments(event.message as any, event.raw_message)}`
             );
         } else if (this.type === 'error') {
             this.print(`${colors.red}[error]${colors.red}`, this.content);
@@ -322,7 +458,7 @@ export class BotConsole {
             this.print(
                 `${colors.cyan}[groupMessageSelf]:${colors.reset} ` +
                 `${colors.yellow}群${colors.reset}(${colors.cyan}${event.group_id}${colors.reset}): ` +
-                `${colors.green}${parseCQ(sanitize(event.raw_message))}${colors.reset}`
+                `${formatSegments(event.message as any, event.raw_message)}`
             );
         } else if (this.type === 'privateMessageSelf') {
             const event = this.content as PrivateMessageSelf;
@@ -331,7 +467,7 @@ export class BotConsole {
                 `${colors.yellow}[privateMessageSelf]:${colors.reset} ` +
                 `${colors.cyan}[${tag}]${colors.reset} ` +
                 `${colors.magenta}发送给${colors.reset}(${colors.blue}${event.user_id}${colors.reset}): ` +
-                `${colors.green}${parseCQ(sanitize(event.raw_message))}${colors.reset}`
+                `${formatSegments(event.message as any, event.raw_message)}`
             );
         } else if (this.type === 'requestFriend') {
             const event = this.content as RequestFriend;
